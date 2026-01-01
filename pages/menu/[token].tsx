@@ -7,11 +7,10 @@ import { Menu } from "@/types/menu";
 import logo from "@/assets/leziz-logo.png";
 
 type Props = {
-  venueName: string;
   menu: Menu;
 };
 
-export default function MenuPage({ venueName, menu }: Props) {
+export default function MenuPage({ menu }: Props) {
   return (
     <div className={styles.page}>
       <div className={styles.content}>
@@ -21,22 +20,22 @@ export default function MenuPage({ venueName, menu }: Props) {
               <h2 className={styles.sectionTitle}>{cat.title}</h2>
             </div>
             <div className={styles.items}>
-                {cat.items.map((item) => (
-                  <div key={item.id} className={styles.item}>
-                    <div className={styles.itemImageWrap}>
-                      <Image
-                        src={logo}
-                        alt={`${item.name} placeholder`}
-                        fill
-                        sizes="96px"
-                        className={styles.itemImage}
-                      />
-                    </div>
-                    <div>
-                      <p className={styles.itemName}>{item.name}</p>
-                      {item.description && (
-                        <p className={styles.itemDescription}>
-                          {item.description}
+              {cat.items.map((item) => (
+                <div key={item.id} className={styles.item}>
+                  <div className={styles.itemImageWrap}>
+                    <Image
+                      src={logo}
+                      alt={`${item.name} placeholder`}
+                      fill
+                      sizes="96px"
+                      className={styles.itemImage}
+                    />
+                  </div>
+                  <div>
+                    <p className={styles.itemName}>{item.name}</p>
+                    {item.description && (
+                      <p className={styles.itemDescription}>
+                        {item.description}
                       </p>
                     )}
                   </div>

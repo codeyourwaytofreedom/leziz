@@ -43,6 +43,7 @@ export default function Layout({
           </Link>
           <div className={styles.links}>
             <Link
+              prefetch
               href="/"
               className={isActive("/") ? styles.active : undefined}
             >
@@ -51,6 +52,7 @@ export default function Layout({
             {shouldShowOwnerLinks && (
               <>
                 <Link
+                  prefetch
                   href="/owner/menu"
                   className={
                     isActive("/owner/menu") ? styles.active : undefined
@@ -59,6 +61,7 @@ export default function Layout({
                   Owner Menu
                 </Link>
                 <Link
+                  prefetch
                   href="/owner/qr"
                   className={
                     isActive("/owner/qr") ? styles.active : undefined
@@ -70,6 +73,7 @@ export default function Layout({
             )}
             {shouldShowLogin && (
               <Link
+                prefetch
                 href="/login"
                 className={isActive("/login") ? styles.active : undefined}
               >
