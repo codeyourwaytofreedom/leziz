@@ -1,0 +1,105 @@
+.page {
+  min-height: 100vh;
+  color: var(--color-text);
+  background: linear-gradient(135deg, #0b1024, #161b33, #1f2647);
+  padding-top: 100px;
+  position: relative;
+  isolation: isolate;
+}
+
+.page::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  background: url("/menubackground.png") center/cover no-repeat;
+  opacity: 0.02;
+  z-index: -1;
+  pointer-events: none;
+}
+
+.content {
+  max-width: 960px;
+  margin: 0 auto;
+  padding: 0 1.25rem 2.5rem;
+  display: grid;
+  gap: 1rem;
+  position: relative;
+  z-index: 1;
+}
+
+.section {
+  padding: 1.25rem;
+  box-shadow: 0 10px 24px var(--color-card-shadow);
+  display: grid;
+  gap: 0.75rem;
+}
+
+.sectionHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 0.5rem;
+}
+
+.sectionTitle {
+  margin: 0;
+  font-size: 1.25rem;
+  color: #f7c948;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.items {
+  display: grid;
+  gap: 1.25rem;
+}
+
+.item {
+  display: grid;
+  grid-template-columns: 96px 1fr auto;
+  gap: 0.5rem 0.75rem;
+  padding: 0.75rem 0.5rem;
+  border-bottom: 1px dashed rgba(255, 255, 255, 0.15);
+}
+
+.itemImageWrap {
+  position: relative;
+  width: 96px;
+  height: 96px;
+  border-radius: 12px;
+  overflow: hidden;
+  background: #0f172a;
+  border: 1px solid var(--color-border);
+}
+
+.itemImage {
+  object-fit: cover;
+}
+
+.item:last-child {
+  border-bottom: none;
+}
+
+.itemName {
+  font-weight: 700;
+  margin: 0;
+  color: #f1f5f9;
+}
+
+.itemPrice {
+  font-weight: 700;
+  color: #f7c948;
+}
+
+.itemDescription {
+  grid-column: 1 / -1;
+  margin: 0;
+  color: #cbd5e1;
+  font-size: 0.95rem;
+}
+
+@media (min-width: 768px) {
+  .hero {
+    height: 260px;
+  }
+}
