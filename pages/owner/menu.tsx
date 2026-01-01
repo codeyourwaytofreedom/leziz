@@ -1,5 +1,7 @@
 import { GetServerSideProps } from "next";
 import { useEffect, useState } from "react";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faFloppyDisk } from "@fortawesome/free-solid-svg-icons";
 import { ObjectId } from "mongodb";
 import { getDb } from "@/lib/mongodb";
 
@@ -377,31 +379,46 @@ export default function OwnerMenuPage({
   return (
     <Layout isLoggedIn showLogin={false}>
       <div className={styles.wrapper}>
-        <h1>Owner · Edit Menu</h1>
+        <h1 className={styles.pageTitle}>Edit Menu</h1>
 
         <div className={styles.venueRow}>
-          <label>
-            Venue name:{" "}
-            <input
-              value={venueName}
-              onChange={(e) => {
-                setVenueName(e.target.value);
-                setHasChanges(true);
-              }}
-              className={styles.venueInput}
-            />
+          <label className={styles.venueLabel} htmlFor="venueName">
+            Venue name
           </label>
+          <input
+            id="venueName"
+            value={venueName}
+            onChange={(e) => {
+              setVenueName(e.target.value);
+              setHasChanges(true);
+            }}
+            className={styles.venueInput}
+          />
         </div>
 
         <section className={styles.section}>
           <div className={styles.headerRow}>
-            <b>Categories</b>
-            <button
-              onClick={addCategory}
-              className={`${styles.btn} ${styles.btnSuccess} ${styles.btnSmall}`}
-            >
-              + Add new category
-            </button>
+            <div className={styles.headerActions}>
+              <span className={styles.statusText}>{status}</span>
+              <button
+                onClick={addCategory}
+                className={`${styles.btn} ${styles.btnAccent} ${styles.btnSmall} ${styles.btnWide}`}
+              >
+                + New category
+              </button>
+              <button
+                onClick={save}
+                className={`${styles.btn} ${styles.btnSuccess} ${styles.btnSmall}`}
+                disabled={!hasChanges}
+              >
+                <FontAwesomeIcon
+                  icon={faFloppyDisk}
+                  aria-hidden
+                  className={styles.btnIconInline}
+                />{" "}
+                Save
+              </button>
+            </div>
           </div>
 
           {menu.categories.length === 0 && (
@@ -434,17 +451,6 @@ export default function OwnerMenuPage({
             );
           })}
         </section>
-
-        <div className={styles.footer}>
-          <button
-            onClick={save}
-            className={`${styles.btn} ${styles.btnPrimary} ${styles.btnLarge}`}
-            disabled={!hasChanges}
-          >
-            Save
-          </button>
-          <span>{status}</span>
-        </div>
       </div>
 
       {renameTarget && (
@@ -483,7 +489,7 @@ export default function OwnerMenuPage({
                   type="submit"
                   className={`${styles.btn} ${styles.btnPrimary} ${styles.btnSmall}`}
                 >
-                  Save
+                  Update
                 </button>
               </div>
             </form>
@@ -558,7 +564,7 @@ export default function OwnerMenuPage({
                   type="submit"
                   className={`${styles.btn} ${styles.btnPrimary} ${styles.btnSmall}`}
                 >
-                  Save
+                  Update
                 </button>
               </div>
             </form>
@@ -627,7 +633,7 @@ export default function OwnerMenuPage({
               type="submit"
               className={`${styles.btn} ${styles.btnPrimary} ${styles.btnSmall}`}
             >
-              Save
+              Update
             </button>
           </div>
         </form>
@@ -691,7 +697,7 @@ export default function OwnerMenuPage({
               type="submit"
               className={`${styles.btn} ${styles.btnPrimary} ${styles.btnSmall}`}
             >
-              Save
+              Update
             </button>
           </div>
         </form>
@@ -819,9 +825,7 @@ export default function OwnerMenuPage({
             <button
               type="submit"
               className={`${styles.btn} ${styles.btnDanger} ${styles.btnSmall}`}
-              disabled={
-                deleteCategoryConfirm.trim().toLowerCase() !== "delete"
-              }
+              disabled={deleteCategoryConfirm.trim().toLowerCase() !== "delete"}
             >
               Delete
             </button>

@@ -89,7 +89,7 @@ export function CategoryCard({
             </button>
             <button
               onClick={onRename}
-              className={`${styles.btn} ${styles.btnSubtle} ${styles.btnSmall}`}
+              className={`${styles.btn} ${styles.btnSubtleDark} ${styles.btnSmall}`}
             >
               Rename
             </button>
