@@ -103,24 +103,31 @@ export function CategoryCard({
         )}
       </div>
 
-      {isExpanded && (
-        <div className={styles.itemsSection}>
-          {category.items.length === 0 && (
-            <div className={styles.itemsEmpty}>
-              No items yet. Click “+ Add item”.
-            </div>
-          )}
+      <div
+        className={`${styles.expandable} ${
+          isExpanded ? styles.expandableOpen : ""
+        }`}
+        aria-hidden={!isExpanded}
+      >
+        {isExpanded && (
+          <div className={styles.itemsSection}>
+            {category.items.length === 0 && (
+              <div className={styles.itemsEmpty}>
+                No items yet. Click “+ Add item”.
+              </div>
+            )}
 
-          {category.items.map((it) => (
-            <ItemCard
-              key={it.id}
-              item={it}
-              onEdit={() => onEditItem(it.id)}
-              onDelete={() => onDeleteItem(it.id)}
-            />
-          ))}
-        </div>
-      )}
+            {category.items.map((it) => (
+              <ItemCard
+                key={it.id}
+                item={it}
+                onEdit={() => onEditItem(it.id)}
+                onDelete={() => onDeleteItem(it.id)}
+              />
+            ))}
+          </div>
+        )}
+      </div>
     </div>
   );
 }

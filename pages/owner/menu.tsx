@@ -69,6 +69,12 @@ export default function OwnerMenuPage({
   const [newCategoryOpen, setNewCategoryOpen] = useState(false);
   const [newCategoryVisible, setNewCategoryVisible] = useState(false);
   const [newCategoryName, setNewCategoryName] = useState("");
+  const [deleteCategoryTarget, setDeleteCategoryTarget] = useState<{
+    catId: string;
+    title: string;
+  } | null>(null);
+  const [deleteCategoryVisible, setDeleteCategoryVisible] = useState(false);
+  const [deleteCategoryConfirm, setDeleteCategoryConfirm] = useState("");
 
   function addCategory() {
     setNewCategoryName("");
@@ -85,17 +91,7 @@ export default function OwnerMenuPage({
   function deleteCategory(catId: string) {
     const cat = menu.categories.find((c) => c.id === catId);
     if (!cat) return;
-    if (!confirm(`Delete category "${cat.title}"?`)) return;
-
-    setMenu((m) => {
-      const next = m.categories.filter((c) => c.id !== catId);
-      return { ...m, categories: next };
-    });
-    setHasChanges(true);
-
-    if (expandedCategoryId === catId) {
-      setExpandedCategoryId(null);
-    }
+    setDeleteCategoryTarget({ catId, title: cat.title });
   }
 
   function addItem(catId: string) {
@@ -228,6 +224,15 @@ export default function OwnerMenuPage({
   }, [deleteTarget]);
 
   useEffect(() => {
+    if (deleteCategoryTarget) {
+      setDeleteCategoryVisible(false);
+      const id = requestAnimationFrame(() => setDeleteCategoryVisible(true));
+      return () => cancelAnimationFrame(id);
+    }
+    setDeleteCategoryVisible(false);
+  }, [deleteCategoryTarget]);
+
+  useEffect(() => {
     if (newCategoryOpen) {
       setNewCategoryVisible(false);
       const id = requestAnimationFrame(() => setNewCategoryVisible(true));
@@ -274,6 +279,34 @@ export default function OwnerMenuPage({
     setDeleteVisible(false);
     setTimeout(() => {
       setDeleteTarget(null);
+    }, 200);
+  }
+
+  function submitDeleteCategory(e: React.FormEvent) {
+    e.preventDefault();
+    if (!deleteCategoryTarget) return;
+    if (deleteCategoryConfirm.trim().toLowerCase() !== "delete") return;
+    const catId = deleteCategoryTarget.catId;
+
+    setMenu((m) => {
+      const next = m.categories.filter((c) => c.id !== catId);
+      return { ...m, categories: next };
+    });
+    setHasChanges(true);
+    if (expandedCategoryId === catId) setExpandedCategoryId(null);
+
+    setDeleteCategoryVisible(false);
+    setTimeout(() => {
+      setDeleteCategoryTarget(null);
+      setDeleteCategoryConfirm("");
+    }, 200);
+  }
+
+  function closeDeleteCategory() {
+    setDeleteCategoryVisible(false);
+    setTimeout(() => {
+      setDeleteCategoryTarget(null);
+      setDeleteCategoryConfirm("");
     }, 200);
   }
 
@@ -749,6 +782,46 @@ export default function OwnerMenuPage({
             <button
               type="submit"
               className={`${styles.btn} ${styles.btnDanger} ${styles.btnSmall}`}
+            >
+              Delete
+            </button>
+          </div>
+        </form>
+      </Modal>
+
+      <Modal
+        isOpen={Boolean(deleteCategoryTarget)}
+        isVisible={deleteCategoryVisible}
+        title="Delete category"
+      >
+        <form onSubmit={submitDeleteCategory} className={styles.modalForm}>
+          <p>
+            Are you sure you want to delete{" "}
+            <strong>{deleteCategoryTarget?.title}</strong> and its items?
+          </p>
+          <label className={styles.modalLabel}>
+            <span>Type DELETE to confirm</span>
+            <input
+              value={deleteCategoryConfirm}
+              onChange={(e) => setDeleteCategoryConfirm(e.target.value)}
+              className={styles.modalInput}
+              placeholder="delete"
+            />
+          </label>
+          <div className={styles.modalActions}>
+            <button
+              type="button"
+              onClick={closeDeleteCategory}
+              className={`${styles.btn} ${styles.btnSubtle} ${styles.btnSmall}`}
+            >
+              Cancel
+            </button>
+            <button
+              type="submit"
+              className={`${styles.btn} ${styles.btnDanger} ${styles.btnSmall}`}
+              disabled={
+                deleteCategoryConfirm.trim().toLowerCase() !== "delete"
+              }
             >
               Delete
             </button>
