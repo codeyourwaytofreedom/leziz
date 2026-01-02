@@ -9,7 +9,7 @@ type MenuItem = {
   name: LocalizedText;
   price: number;
   description?: LocalizedText;
-  ingredients?: string[];
+  ingredients?: LocalizedText[];
 };
 
 type Category = {

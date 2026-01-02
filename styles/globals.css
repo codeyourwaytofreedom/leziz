@@ -14,6 +14,9 @@
   --color-primary: #111827;
   --color-primary-strong: #0b1120;
   --color-accent: #6366f1;
+  --color-accent-soft-bg: #e0e7ff;
+  --color-accent-soft-border: #a5b4fc;
+  --color-accent-soft-text: #312e81;
   --color-success-bg: #ecfdf3;
   --color-success-border: #bbf7d0;
   --color-success-hover-bg: #d1fae5;

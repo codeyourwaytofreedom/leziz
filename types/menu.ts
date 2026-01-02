@@ -5,7 +5,7 @@ export type MenuItem = {
   name: LocalizedText;
   price: number;
   description?: LocalizedText;
-  ingredients?: string[];
+  ingredients?: LocalizedText[];
 };
 
 export type Category = {

@@ -12,6 +12,9 @@ import { Modal } from "@/components/menu/Modal";
 import styles from "@/styles/menu/menu.module.scss";
 import { Category, Menu, MenuItem, LocalizedText } from "@/types/menu";
 
+type Language = "en" | "tr" | "de";
+const languages: Language[] = ["en", "tr", "de"];
+
 type Props = {
   venueId: string; // ObjectId as string
   venueName: LocalizedText;
@@ -25,10 +28,41 @@ function uid(prefix = "id") {
     .slice(2)}_${Date.now().toString(16)}`;
 }
 
-function resolveText(value?: LocalizedText) {
+function resolveText(value: LocalizedText | undefined, lang: Language) {
   if (!value) return "";
   if (typeof value === "string") return value;
-  return value.en ?? value.tr ?? value.de ?? Object.values(value)[0] ?? "";
+  return (
+    value[lang] ?? value.en ?? value.tr ?? value.de ?? Object.values(value)[0] ?? ""
+  );
+}
+
+function setLocalized(
+  value: LocalizedText | undefined,
+  lang: Language,
+  text: string
+): LocalizedText | undefined {
+  const nextText = text.trim();
+  const base = typeof value === "string" ? {} : value ?? {};
+
+  if (!nextText) {
+    const { [lang]: _removed, ...rest } = base;
+    return Object.keys(rest).length ? rest : undefined;
+  }
+
+  return { ...base, [lang]: nextText };
+}
+
+function toLocalizedArray(
+  current: LocalizedText[] | undefined,
+  lang: Language,
+  raw: string
+): LocalizedText[] | undefined {
+  const parts = raw
+    .split(",")
+    .map((p) => p.trim())
+    .filter(Boolean);
+  if (!parts.length) return undefined;
+  return parts.map((part, idx) => setLocalized(current?.[idx], lang, part) ?? part);
 }
 
 export default function OwnerMenuPage({
@@ -36,7 +70,10 @@ export default function OwnerMenuPage({
   venueName: initialVenueName,
   menu: initialMenu,
 }: Props) {
-  const [venueName, setVenueName] = useState(resolveText(initialVenueName));
+  const [language, setLanguage] = useState<Language>("en");
+  const [venueName, setVenueName] = useState(() =>
+    resolveText(initialVenueName, "en")
+  );
   const [menu, setMenu] = useState<Menu>(initialMenu);
   const [hasChanges, setHasChanges] = useState(false);
 
@@ -94,7 +131,7 @@ export default function OwnerMenuPage({
   function renameCategory(catId: string) {
     const cat = menu.categories.find((c) => c.id === catId);
     if (!cat) return;
-    const displayTitle = resolveText(cat.title);
+    const displayTitle = resolveText(cat.title, language);
     setRenameTarget({ id: catId, name: displayTitle });
     setRenameValue(displayTitle);
   }
@@ -102,7 +139,7 @@ export default function OwnerMenuPage({
   function deleteCategory(catId: string) {
     const cat = menu.categories.find((c) => c.id === catId);
     if (!cat) return;
-    setDeleteCategoryTarget({ catId, title: resolveText(cat.title) });
+    setDeleteCategoryTarget({ catId, title: resolveText(cat.title, language) });
   }
 
   function addItem(catId: string) {
@@ -121,17 +158,13 @@ export default function OwnerMenuPage({
     if (Number.isNaN(price)) return;
 
     const description = addValues.description.trim() || undefined;
-    const ingredientsList = addValues.ingredients
-      .split(",")
-      .map((ing) => ing.trim())
-      .filter(Boolean);
-    const ingredients = ingredientsList.length ? ingredientsList : undefined;
+    const ingredients = toLocalizedArray(undefined, language, addValues.ingredients);
 
     const item: MenuItem = {
       id: uid("item"),
-      name,
+      name: setLocalized(undefined, language, name) ?? name,
       price,
-      description,
+      description: setLocalized(undefined, language, description ?? ""),
       ingredients,
     };
 
@@ -167,7 +200,9 @@ export default function OwnerMenuPage({
     setMenu((m) => ({
       ...m,
       categories: m.categories.map((c) =>
-        c.id === renameTarget.id ? { ...c, title } : c
+        c.id === renameTarget.id
+          ? { ...c, title: setLocalized(c.title, language, title) ?? title }
+          : c
       ),
     }));
     setHasChanges(true);
@@ -182,7 +217,11 @@ export default function OwnerMenuPage({
     e.preventDefault();
     const title = newCategoryName.trim();
     if (!title) return;
-    const newCat: Category = { id: uid("cat"), title, items: [] };
+    const newCat: Category = {
+      id: uid("cat"),
+      title: setLocalized(undefined, language, title) ?? title,
+      items: [],
+    };
     setMenu((m) => ({ ...m, categories: [...m.categories, newCat] }));
     setHasChanges(true);
     setExpandedCategoryId(newCat.id);
@@ -270,10 +309,11 @@ export default function OwnerMenuPage({
 
     setEditTarget({ catId, itemId });
     setEditValues({
-      name: resolveText(item.name),
+      name: resolveText(item.name, language),
       price: String(item.price),
-      description: resolveText(item.description),
-      ingredients: item.ingredients?.join(", ") ?? "",
+      description: resolveText(item.description, language),
+      ingredients:
+        item.ingredients?.map((ing) => resolveText(ing, language)).join(", ") ?? "",
     });
   }
 
@@ -344,11 +384,14 @@ export default function OwnerMenuPage({
     if (Number.isNaN(price)) return;
 
     const description = editValues.description.trim();
-    const ingredientsList = editValues.ingredients
-      .split(",")
-      .map((ing) => ing.trim())
-      .filter(Boolean);
-    const ingredients = ingredientsList.length ? ingredientsList : undefined;
+    const currentItem = menu.categories
+      .find((c) => c.id === editTarget.catId)
+      ?.items.find((i) => i.id === editTarget.itemId);
+    const ingredients = toLocalizedArray(
+      currentItem?.ingredients,
+      language,
+      editValues.ingredients
+    );
 
     setMenu((m) => ({
       ...m,
@@ -360,9 +403,9 @@ export default function OwnerMenuPage({
             i.id === editTarget.itemId
               ? {
                   ...i,
-                  name,
+                  name: setLocalized(i.name, language, name) ?? name,
                   price,
-                  description: description || undefined,
+                  description: setLocalized(i.description, language, description),
                   ingredients,
                 }
               : i
@@ -407,6 +450,23 @@ export default function OwnerMenuPage({
     <Layout isLoggedIn showLogin={false}>
       <div className={styles.wrapper}>
         <h1 className={styles.pageTitle}>Edit Menu</h1>
+
+        <div className={styles.languageRow}>
+          <div className={styles.languageSwitcher}>
+            {languages.map((lang) => (
+              <button
+                key={lang}
+                type="button"
+                onClick={() => setLanguage(lang)}
+                className={`${styles.btn} ${styles.languageButton} ${
+                  language === lang ? styles.languageButtonActive : ""
+                }`}
+              >
+                {lang.toUpperCase()}
+              </button>
+            ))}
+          </div>
+        </div>
 
         <div className={styles.venueRow}>
           <label className={styles.venueLabel} htmlFor="venueName">
@@ -471,9 +531,10 @@ export default function OwnerMenuPage({
                   setDeleteTarget({
                     catId: c.id,
                     itemId,
-                    name: resolveText(item?.name) || "Item",
+                    name: resolveText(item?.name, language) || "Item",
                   });
                 }}
+                language={language}
               />
             );
           })}

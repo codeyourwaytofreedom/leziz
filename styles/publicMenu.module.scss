@@ -144,6 +144,52 @@
   background: rgba(255, 255, 255, 0.04);
 }
 
+.topBar {
+  max-width: 960px;
+  margin: 0 auto;
+  padding: 0 1.25rem 1rem;
+  display: flex;
+  justify-content: flex-end;
+  position: sticky;
+  top: 0;
+  z-index: 2;
+}
+
+.languageSwitcher {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  background: rgba(255, 255, 255, 0.08);
+  padding: 0.6rem 0.75rem;
+  border-radius: 999px;
+  backdrop-filter: blur(6px);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+}
+
+.languageButton {
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  background: rgba(255, 255, 255, 0.08);
+  color: #f8fafc;
+  padding: 0.4rem 0.7rem;
+  border-radius: 12px;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  transition: all 0.12s ease;
+}
+
+.languageButton:hover {
+  background: rgba(255, 255, 255, 0.16);
+  transform: translateY(-1px);
+}
+
+.languageButtonActive {
+  background: linear-gradient(135deg, #f7c948, #f59e0b);
+  color: #0b1024;
+  border-color: transparent;
+  box-shadow: 0 6px 18px rgba(247, 201, 72, 0.35);
+}
+
 @media (min-width: 768px) {
   .hero {
     height: 260px;

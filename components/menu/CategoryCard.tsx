@@ -5,24 +5,32 @@ import {
   faChevronRight,
 } from "@fortawesome/free-solid-svg-icons";
 
-import { Category, MenuItem } from "@/types/menu";
+import { Category, MenuItem, LocalizedText } from "@/types/menu";
 import styles from "@/styles/menu/menu.module.scss";
 
-function resolveText(value?: MenuItem["name"] | MenuItem["description"]) {
+type Language = "en" | "tr" | "de";
+
+function resolveText(
+  value: MenuItem["name"] | MenuItem["description"] | LocalizedText,
+  lang: Language
+) {
   if (!value) return "";
   if (typeof value === "string") return value;
-  return value.en ?? value.tr ?? value.de ?? Object.values(value)[0] ?? "";
+  return (
+    value[lang] ?? value.en ?? value.tr ?? value.de ?? Object.values(value)[0] ?? ""
+  );
 }
 
 type ItemCardProps = {
   item: MenuItem;
   onEdit: () => void;
   onDelete: () => void;
+  language: Language;
 };
 
-function ItemCard({ item, onEdit, onDelete }: ItemCardProps) {
-  const displayName = resolveText(item.name);
-  const displayDescription = resolveText(item.description);
+function ItemCard({ item, onEdit, onDelete, language }: ItemCardProps) {
+  const displayName = resolveText(item.name, language);
+  const displayDescription = resolveText(item.description, language);
 
   return (
     <div className={styles.itemCard}>
@@ -33,9 +41,9 @@ function ItemCard({ item, onEdit, onDelete }: ItemCardProps) {
         ) : null}
         {item.ingredients && item.ingredients.length > 0 ? (
           <div className={styles.itemIngredients}>
-            {item.ingredients.map((ing) => (
-              <span key={ing} className={styles.ingredientPill}>
-                {ing}
+            {item.ingredients.map((ing, idx) => (
+              <span key={idx} className={styles.ingredientPill}>
+                {resolveText(ing, language)}
               </span>
             ))}
           </div>
@@ -73,6 +81,7 @@ type CategoryCardProps = {
   onDelete: () => void;
   onEditItem: (itemId: string) => void;
   onDeleteItem: (itemId: string) => void;
+  language: Language;
 };
 
 export function CategoryCard({
@@ -84,8 +93,9 @@ export function CategoryCard({
   onDelete,
   onEditItem,
   onDeleteItem,
+  language,
 }: CategoryCardProps) {
-  const displayTitle = resolveText(category.title);
+  const displayTitle = resolveText(category.title, language);
 
   return (
     <div
@@ -149,6 +159,7 @@ export function CategoryCard({
                 item={it}
                 onEdit={() => onEditItem(it.id)}
                 onDelete={() => onDeleteItem(it.id)}
+                language={language}
               />
             ))}
           </div>

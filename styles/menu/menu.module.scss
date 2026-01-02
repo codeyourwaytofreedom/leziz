@@ -8,6 +8,34 @@
   margin-bottom: 22px;
 }
 
+.languageRow {
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: 8px;
+}
+
+.languageSwitcher {
+  display: flex;
+  gap: 6px;
+  padding: 6px;
+  border-radius: 999px;
+}
+
+.languageButton {
+  border-color: transparent;
+  background: transparent;
+  padding: 0.35rem 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  color: var(--color-text-muted);
+}
+
+.languageButtonActive {
+  background: var(--color-accent-soft-bg) !important;
+  border-color: var(--color-accent-soft-border) !important;
+  color: var(--color-accent-soft-text) !important;
+}
+
 .venueRow {
   margin-top: 12px;
   display: flex;
@@ -74,7 +102,8 @@
   background: var(--color-surface);
   box-shadow: 0 8px 20px var(--color-card-shadow);
   padding: 6px 8px;
-  transition: border-color 160ms ease, box-shadow 160ms ease, background-color 160ms ease;
+  transition: border-color 160ms ease, box-shadow 160ms ease,
+    background-color 160ms ease;
 }
 
 .categoryCardExpanded {
@@ -220,8 +249,8 @@
   color: var(--color-text);
   font-weight: 600;
   cursor: pointer;
-  transition: background-color 140ms ease, color 140ms ease, border-color 140ms ease,
-    transform 120ms ease;
+  transition: background-color 140ms ease, color 140ms ease,
+    border-color 140ms ease, transform 120ms ease;
 
   &:not(:disabled):hover {
     transform: translateY(-1px);
