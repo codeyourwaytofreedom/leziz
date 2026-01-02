@@ -8,7 +8,7 @@ import {
 import { Category, MenuItem, LocalizedText } from "@/types/menu";
 import styles from "@/styles/menu/menu.module.scss";
 
-type Language = "en" | "tr" | "de";
+type Language = string;
 
 function resolveText(
   value: MenuItem["name"] | MenuItem["description"] | LocalizedText,

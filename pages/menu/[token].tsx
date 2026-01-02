@@ -9,10 +9,10 @@ import logo from "@/assets/leziz-logo.png";
 
 type Props = {
   menu: Menu;
+  languages: string[];
 };
 
-type Language = "en" | "tr" | "de";
-const languages: Language[] = ["en", "tr", "de"];
+type Language = string;
 
 function resolveText(value: LocalizedText | undefined, lang: Language) {
   if (!value) return "";
@@ -22,8 +22,12 @@ function resolveText(value: LocalizedText | undefined, lang: Language) {
   );
 }
 
-export default function MenuPage({ menu }: Props) {
-  const [language, setLanguage] = useState<Language>("en");
+export default function MenuPage({ menu, languages: providedLanguages }: Props) {
+  const languages =
+    providedLanguages && providedLanguages.length > 0
+      ? providedLanguages
+      : (["en", "tr", "de"] as Language[]);
+  const [language, setLanguage] = useState<Language>(languages[0] ?? "en");
 
   const ingredientsLabel = {
     en: "Ingredients:",
@@ -112,7 +116,7 @@ export default function MenuPage({ menu }: Props) {
   );
 }
 
-export const getServerSideProps: GetServerSideProps = async (ctx) => {
+export const getServerSideProps: GetServerSideProps<Props> = async (ctx) => {
   const token = ctx.params?.token as string;
   const db = await getDb();
 
@@ -127,11 +131,14 @@ export const getServerSideProps: GetServerSideProps = async (ctx) => {
     .findOne({ _id: new ObjectId(tokenDoc.venueId) });
   if (!venue) return { notFound: true };
 
+  const languages = Array.isArray(venue.langs) ? venue.langs : ["en", "tr", "de"];
+
   return {
     props: {
       token,
       venueName: venue.name,
       menu: venue.menu,
+      languages,
     },
   };
 };

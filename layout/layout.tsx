@@ -1,7 +1,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/router";
-import { ReactNode } from "react";
+import { ReactNode, useState } from "react";
 
 import styles from "./layout.module.scss";
 import logo from "@/assets/leziz-logo.png";
@@ -18,6 +18,7 @@ export default function Layout({
   isLoggedIn = false,
 }: LayoutProps) {
   const router = useRouter();
+  const [loggingOut, setLoggingOut] = useState(false);
 
   const isActive = (href: string) =>
     router.pathname === href ||
@@ -25,6 +26,17 @@ export default function Layout({
 
   const shouldShowLogin = showLogin && !isLoggedIn;
   const shouldShowOwnerLinks = isLoggedIn;
+
+  async function handleLogout() {
+    try {
+      setLoggingOut(true);
+      const res = await fetch("/api/auth/logout", { method: "POST" });
+      if (!res.ok) throw new Error("Logout failed");
+      await router.push("/");
+    } finally {
+      setLoggingOut(false);
+    }
+  }
 
   return (
     <div className={styles.appLayout}>
@@ -79,6 +91,16 @@ export default function Layout({
               >
                 Login
               </Link>
+            )}
+            {isLoggedIn && (
+              <button
+                type="button"
+                className={styles.logoutButton}
+                onClick={handleLogout}
+                disabled={loggingOut}
+              >
+                {loggingOut ? "Logging out..." : "Logout"}
+              </button>
             )}
           </div>
         </nav>

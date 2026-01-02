@@ -12,13 +12,13 @@ import { Modal } from "@/components/menu/Modal";
 import styles from "@/styles/menu/menu.module.scss";
 import { Category, Menu, MenuItem, LocalizedText } from "@/types/menu";
 
-type Language = "en" | "tr" | "de";
-const languages: Language[] = ["en", "tr", "de"];
+type Language = string;
 
 type Props = {
   venueId: string; // ObjectId as string
   venueName: LocalizedText;
   menu: Menu;
+  languages: Language[];
 };
 
 function uid(prefix = "id") {
@@ -69,16 +69,21 @@ export default function OwnerMenuPage({
   venueId,
   venueName: initialVenueName,
   menu: initialMenu,
+  languages: providedLanguages,
 }: Props) {
-  const [language, setLanguage] = useState<Language>("en");
+  const languages =
+    providedLanguages && providedLanguages.length > 0
+      ? providedLanguages
+      : (["en", "tr", "de"] as Language[]);
+  const [language, setLanguage] = useState<Language>(languages[0] ?? "en");
   const [venueName, setVenueName] = useState(() =>
-    resolveText(initialVenueName, "en")
+    resolveText(initialVenueName, languages[0] ?? "en")
   );
   const [menu, setMenu] = useState<Menu>(initialMenu);
   const [hasChanges, setHasChanges] = useState(false);
 
   const [expandedCategoryId, setExpandedCategoryId] = useState<string | null>(
-    initialMenu.categories[0]?.id ?? null
+    null
   );
 
   const [status, setStatus] = useState<string>("");
@@ -954,7 +959,7 @@ export default function OwnerMenuPage({
   );
 }
 
-export const getServerSideProps: GetServerSideProps = async (ctx) => {
+export const getServerSideProps: GetServerSideProps<Props> = async (ctx) => {
   const session = getSession(ctx.req);
   if (!session) {
     return {
@@ -979,6 +984,7 @@ export const getServerSideProps: GetServerSideProps = async (ctx) => {
       venueId,
       venueName: venue.name ?? "Venue",
       menu,
+      languages: Array.isArray(venue.langs) ? venue.langs : ["en", "tr", "de"],
     },
   };
 };
