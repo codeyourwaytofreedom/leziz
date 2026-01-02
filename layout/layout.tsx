@@ -3,6 +3,9 @@ import Link from "next/link";
 import { useRouter } from "next/router";
 import { ReactNode, useState } from "react";
 
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faRightFromBracket } from "@fortawesome/free-solid-svg-icons";
+
 import styles from "./layout.module.scss";
 import logo from "@/assets/leziz-logo.png";
 
@@ -54,32 +57,14 @@ export default function Layout({
             <span className={styles.brandText}>Leziz</span>
           </Link>
           <div className={styles.links}>
-            <Link
-              prefetch
-              href="/"
-              className={isActive("/") ? styles.active : undefined}
-            >
-              Home
-            </Link>
             {shouldShowOwnerLinks && (
               <>
                 <Link
                   prefetch
                   href="/owner/menu"
-                  className={
-                    isActive("/owner/menu") ? styles.active : undefined
-                  }
+                  className={isActive("/owner/menu") ? styles.active : undefined}
                 >
-                  Owner Menu
-                </Link>
-                <Link
-                  prefetch
-                  href="/owner/qr"
-                  className={
-                    isActive("/owner/qr") ? styles.active : undefined
-                  }
-                >
-                  Owner QR
+                  My Menu
                 </Link>
               </>
             )}
@@ -98,8 +83,9 @@ export default function Layout({
                 className={styles.logoutButton}
                 onClick={handleLogout}
                 disabled={loggingOut}
+                aria-label="Logout"
               >
-                {loggingOut ? "Logging out..." : "Logout"}
+                <FontAwesomeIcon icon={faRightFromBracket} />
               </button>
             )}
           </div>

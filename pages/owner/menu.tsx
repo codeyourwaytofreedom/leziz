@@ -1,12 +1,15 @@
 import { GetServerSideProps } from "next";
+import Image from "next/image";
 import { useEffect, useState } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faFloppyDisk } from "@fortawesome/free-solid-svg-icons";
 import { ObjectId } from "mongodb";
 import { getDb } from "@/lib/mongodb";
+import QRCode from "qrcode";
 
 import { getSession } from "@/lib/session";
 import Layout from "@/layout/layout";
+import { useToast } from "@/lib/toast";
 import { CategoryCard } from "@/components/menu/CategoryCard";
 import { Modal } from "@/components/menu/Modal";
 import styles from "@/styles/menu/menu.module.scss";
@@ -19,6 +22,8 @@ type Props = {
   venueName: LocalizedText;
   menu: Menu;
   languages: Language[];
+  qrUrl?: string;
+  qrDataUrl?: string;
 };
 
 function uid(prefix = "id") {
@@ -32,7 +37,12 @@ function resolveText(value: LocalizedText | undefined, lang: Language) {
   if (!value) return "";
   if (typeof value === "string") return value;
   return (
-    value[lang] ?? value.en ?? value.tr ?? value.de ?? Object.values(value)[0] ?? ""
+    value[lang] ??
+    value.en ??
+    value.tr ??
+    value.de ??
+    Object.values(value)[0] ??
+    ""
   );
 }
 
@@ -62,7 +72,38 @@ function toLocalizedArray(
     .map((p) => p.trim())
     .filter(Boolean);
   if (!parts.length) return undefined;
-  return parts.map((part, idx) => setLocalized(current?.[idx], lang, part) ?? part);
+  return parts.map(
+    (part, idx) => setLocalized(current?.[idx], lang, part) ?? part
+  );
+}
+
+function buildIngredientsFromAllLanguages(
+  perLanguage: Record<string, string>,
+  languages: Language[]
+): LocalizedText[] | undefined {
+  const splitByLang = languages.map((lang) => ({
+    lang,
+    parts: (perLanguage[lang] ?? "")
+      .split(",")
+      .map((p) => p.trim())
+      .filter(Boolean),
+  }));
+
+  const maxLen = splitByLang.reduce(
+    (max, entry) => Math.max(max, entry.parts.length),
+    0
+  );
+  if (maxLen === 0) return undefined;
+
+  const result: LocalizedText[] = [];
+  for (let i = 0; i < maxLen; i++) {
+    const entry: Record<string, string> = {};
+    splitByLang.forEach(({ lang, parts }) => {
+      if (parts[i]) entry[lang] = parts[i];
+    });
+    if (Object.keys(entry).length > 0) result.push(entry);
+  }
+  return result.length ? result : undefined;
 }
 
 export default function OwnerMenuPage({
@@ -70,6 +111,8 @@ export default function OwnerMenuPage({
   venueName: initialVenueName,
   menu: initialMenu,
   languages: providedLanguages,
+  qrUrl,
+  qrDataUrl,
 }: Props) {
   const languages =
     providedLanguages && providedLanguages.length > 0
@@ -81,36 +124,45 @@ export default function OwnerMenuPage({
   );
   const [menu, setMenu] = useState<Menu>(initialMenu);
   const [hasChanges, setHasChanges] = useState(false);
+  const [qrModalOpen, setQrModalOpen] = useState(false);
+  const toast = useToast();
 
   const [expandedCategoryId, setExpandedCategoryId] = useState<string | null>(
     null
   );
 
-  const [status, setStatus] = useState<string>("");
   const [renameTarget, setRenameTarget] = useState<{
     id: string;
     name: string;
   } | null>(null);
-  const [renameValue, setRenameValue] = useState("");
+  const [renameTranslations, setRenameTranslations] = useState<
+    Record<string, string>
+  >({});
   const [renameVisible, setRenameVisible] = useState(false);
   const [addTarget, setAddTarget] = useState<{ catId: string } | null>(null);
   const [addValues, setAddValues] = useState<{
-    name: string;
+    names: Record<string, string>;
     price: string;
-    description: string;
-    ingredients: string;
-  }>({ name: "", price: "", description: "", ingredients: "" });
+    descriptions: Record<string, string>;
+    ingredients: Record<string, string>;
+  }>({ names: {}, price: "", descriptions: {}, ingredients: {} });
+  const [addLanguageTab, setAddLanguageTab] = useState<Language>(
+    languages[0] ?? "en"
+  );
   const [addVisible, setAddVisible] = useState(false);
   const [editTarget, setEditTarget] = useState<{
     catId: string;
     itemId: string;
   } | null>(null);
   const [editValues, setEditValues] = useState<{
-    name: string;
+    names: Record<string, string>;
     price: string;
-    description: string;
-    ingredients: string;
-  }>({ name: "", price: "", description: "", ingredients: "" });
+    descriptions: Record<string, string>;
+    ingredients: Record<string, string>;
+  }>({ names: {}, price: "", descriptions: {}, ingredients: {} });
+  const [editLanguageTab, setEditLanguageTab] = useState<Language>(
+    languages[0] ?? "en"
+  );
   const [editVisible, setEditVisible] = useState(false);
   const [deleteTarget, setDeleteTarget] = useState<{
     catId: string;
@@ -120,7 +172,9 @@ export default function OwnerMenuPage({
   const [deleteVisible, setDeleteVisible] = useState(false);
   const [newCategoryOpen, setNewCategoryOpen] = useState(false);
   const [newCategoryVisible, setNewCategoryVisible] = useState(false);
-  const [newCategoryName, setNewCategoryName] = useState("");
+  const [newCategoryTranslations, setNewCategoryTranslations] = useState<
+    Record<string, string>
+  >({});
   const [deleteCategoryTarget, setDeleteCategoryTarget] = useState<{
     catId: string;
     title: string;
@@ -129,7 +183,7 @@ export default function OwnerMenuPage({
   const [deleteCategoryConfirm, setDeleteCategoryConfirm] = useState("");
 
   function addCategory() {
-    setNewCategoryName("");
+    setNewCategoryTranslations({});
     setNewCategoryOpen(true);
   }
 
@@ -138,7 +192,19 @@ export default function OwnerMenuPage({
     if (!cat) return;
     const displayTitle = resolveText(cat.title, language);
     setRenameTarget({ id: catId, name: displayTitle });
-    setRenameValue(displayTitle);
+    const base = typeof cat.title === "string" ? {} : cat.title ?? {};
+    const nextTranslations = languages.reduce<Record<string, string>>(
+      (acc, lang) => {
+        const val =
+          typeof cat.title === "string"
+            ? resolveText(cat.title, lang)
+            : base[lang] ?? resolveText(cat.title, lang);
+        if (val) acc[lang] = val;
+        return acc;
+      },
+      {}
+    );
+    setRenameTranslations(nextTranslations);
   }
 
   function deleteCategory(catId: string) {
@@ -149,27 +215,48 @@ export default function OwnerMenuPage({
 
   function addItem(catId: string) {
     setAddTarget({ catId });
-    setAddValues({ name: "", price: "", description: "", ingredients: "" });
+    setAddValues({ names: {}, price: "", descriptions: {}, ingredients: {} });
+    setAddLanguageTab(languages[0] ?? "en");
   }
 
   function submitAdd(e: React.FormEvent) {
     e.preventDefault();
     if (!addTarget) return;
 
-    const name = addValues.name.trim();
-    if (!name) return;
+    const nameTranslations = languages.reduce<Record<string, string>>(
+      (acc, lang) => {
+        const val = (addValues.names[lang] ?? "").trim();
+        if (val) acc[lang] = val;
+        return acc;
+      },
+      {}
+    );
+    if (Object.keys(nameTranslations).length !== languages.length) return;
 
     const price = Number(addValues.price);
     if (Number.isNaN(price)) return;
 
-    const description = addValues.description.trim() || undefined;
-    const ingredients = toLocalizedArray(undefined, language, addValues.ingredients);
+    const descriptionTranslations = languages.reduce<Record<string, string>>(
+      (acc, lang) => {
+        const val = (addValues.descriptions[lang] ?? "").trim();
+        if (val) acc[lang] = val;
+        return acc;
+      },
+      {}
+    );
+    const ingredients = buildIngredientsFromAllLanguages(
+      addValues.ingredients,
+      languages
+    );
 
     const item: MenuItem = {
       id: uid("item"),
-      name: setLocalized(undefined, language, name) ?? name,
+      name: nameTranslations,
       price,
-      description: setLocalized(undefined, language, description ?? ""),
+      description:
+        Object.keys(descriptionTranslations).length > 0
+          ? descriptionTranslations
+          : undefined,
       ingredients,
     };
 
@@ -184,7 +271,7 @@ export default function OwnerMenuPage({
     setAddVisible(false);
     setTimeout(() => {
       setAddTarget(null);
-      setAddValues({ name: "", price: "", description: "", ingredients: "" });
+      setAddValues({ names: {}, price: "", descriptions: {}, ingredients: {} });
     }, 200);
   }
 
@@ -192,39 +279,54 @@ export default function OwnerMenuPage({
     setAddVisible(false);
     setTimeout(() => {
       setAddTarget(null);
-      setAddValues({ name: "", price: "", description: "", ingredients: "" });
+      setAddValues({ names: {}, price: "", descriptions: {}, ingredients: {} });
     }, 200);
   }
 
   function submitRename(e: React.FormEvent) {
     e.preventDefault();
     if (!renameTarget) return;
-    const title = renameValue.trim();
-    if (!title) return;
+
+    const translations = languages.reduce<Record<string, string>>(
+      (acc, lang) => {
+        const val = (renameTranslations[lang] ?? "").trim();
+        if (val) acc[lang] = val;
+        return acc;
+      },
+      {}
+    );
+    if (Object.keys(translations).length !== languages.length) return;
 
     setMenu((m) => ({
       ...m,
       categories: m.categories.map((c) =>
-        c.id === renameTarget.id
-          ? { ...c, title: setLocalized(c.title, language, title) ?? title }
-          : c
+        c.id === renameTarget.id ? { ...c, title: translations } : c
       ),
     }));
     setHasChanges(true);
     setRenameVisible(false);
     setTimeout(() => {
       setRenameTarget(null);
-      setRenameValue("");
+      setRenameTranslations({});
     }, 200);
   }
 
   function submitNewCategory(e: React.FormEvent) {
     e.preventDefault();
-    const title = newCategoryName.trim();
-    if (!title) return;
+    const translations = languages.reduce<Record<string, string>>(
+      (acc, lang) => {
+        const val = (newCategoryTranslations[lang] ?? "").trim();
+        if (val) acc[lang] = val;
+        return acc;
+      },
+      {}
+    );
+
+    if (Object.keys(translations).length === 0) return;
+
     const newCat: Category = {
       id: uid("cat"),
-      title: setLocalized(undefined, language, title) ?? title,
+      title: translations,
       items: [],
     };
     setMenu((m) => ({ ...m, categories: [...m.categories, newCat] }));
@@ -233,7 +335,7 @@ export default function OwnerMenuPage({
     setNewCategoryVisible(false);
     setTimeout(() => {
       setNewCategoryOpen(false);
-      setNewCategoryName("");
+      setNewCategoryTranslations({});
     }, 200);
   }
 
@@ -241,7 +343,7 @@ export default function OwnerMenuPage({
     setNewCategoryVisible(false);
     setTimeout(() => {
       setNewCategoryOpen(false);
-      setNewCategoryName("");
+      setNewCategoryTranslations({});
     }, 200);
   }
 
@@ -249,7 +351,7 @@ export default function OwnerMenuPage({
     setRenameVisible(false);
     setTimeout(() => {
       setRenameTarget(null);
-      setRenameValue("");
+      setRenameTranslations({});
     }, 200);
   }
 
@@ -313,12 +415,42 @@ export default function OwnerMenuPage({
     if (!cat || !item) return;
 
     setEditTarget({ catId, itemId });
+    setEditLanguageTab(language);
+
+    const nameTranslations = languages.reduce<Record<string, string>>(
+      (acc, lang) => {
+        const val = resolveText(item.name, lang);
+        if (val) acc[lang] = val;
+        return acc;
+      },
+      {}
+    );
+    const descriptionTranslations = languages.reduce<Record<string, string>>(
+      (acc, lang) => {
+        const val = resolveText(item.description, lang);
+        if (val) acc[lang] = val;
+        return acc;
+      },
+      {}
+    );
+
+    const ingredientStrings: Record<string, string> = languages.reduce(
+      (acc, lang) => {
+        const val =
+          item.ingredients
+            ?.map((ing) => resolveText(ing, lang))
+            .filter(Boolean)
+            .join(", ") ?? "";
+        return { ...acc, [lang]: val };
+      },
+      {}
+    );
+
     setEditValues({
-      name: resolveText(item.name, language),
+      names: nameTranslations,
       price: String(item.price),
-      description: resolveText(item.description, language),
-      ingredients:
-        item.ingredients?.map((ing) => resolveText(ing, language)).join(", ") ?? "",
+      descriptions: descriptionTranslations,
+      ingredients: ingredientStrings,
     });
   }
 
@@ -382,20 +514,33 @@ export default function OwnerMenuPage({
     e.preventDefault();
     if (!editTarget) return;
 
-    const name = editValues.name.trim();
-    if (!name) return;
+    const nameTranslations = languages.reduce<Record<string, string>>(
+      (acc, lang) => {
+        const val = (editValues.names[lang] ?? "").trim();
+        if (val) acc[lang] = val;
+        return acc;
+      },
+      {}
+    );
+    if (Object.keys(nameTranslations).length !== languages.length) return;
 
     const price = Number(editValues.price);
     if (Number.isNaN(price)) return;
 
-    const description = editValues.description.trim();
+    const descriptionTranslations = languages.reduce<Record<string, string>>(
+      (acc, lang) => {
+        const val = (editValues.descriptions[lang] ?? "").trim();
+        if (val) acc[lang] = val;
+        return acc;
+      },
+      {}
+    );
     const currentItem = menu.categories
       .find((c) => c.id === editTarget.catId)
       ?.items.find((i) => i.id === editTarget.itemId);
-    const ingredients = toLocalizedArray(
-      currentItem?.ingredients,
-      language,
-      editValues.ingredients
+    const ingredients = buildIngredientsFromAllLanguages(
+      editValues.ingredients,
+      languages
     );
 
     setMenu((m) => ({
@@ -408,9 +553,12 @@ export default function OwnerMenuPage({
             i.id === editTarget.itemId
               ? {
                   ...i,
-                  name: setLocalized(i.name, language, name) ?? name,
+                  name: nameTranslations,
                   price,
-                  description: setLocalized(i.description, language, description),
+                  description:
+                    Object.keys(descriptionTranslations).length > 0
+                      ? descriptionTranslations
+                      : undefined,
                   ingredients,
                 }
               : i
@@ -423,7 +571,12 @@ export default function OwnerMenuPage({
     setEditVisible(false);
     setTimeout(() => {
       setEditTarget(null);
-      setEditValues({ name: "", price: "", description: "", ingredients: "" });
+      setEditValues({
+        names: {},
+        price: "",
+        descriptions: {},
+        ingredients: {},
+      });
     }, 200);
   }
 
@@ -431,49 +584,88 @@ export default function OwnerMenuPage({
     setEditVisible(false);
     setTimeout(() => {
       setEditTarget(null);
-      setEditValues({ name: "", price: "", description: "", ingredients: "" });
+      setEditValues({
+        names: {},
+        price: "",
+        descriptions: {},
+        ingredients: {},
+      });
     }, 200);
   }
 
   async function save() {
     try {
-      setStatus("Saving...");
       const res = await fetch("/api/owner/menu", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ venueId, venueName, menu }),
       });
       if (!res.ok) throw new Error(await res.text());
-      setStatus("Saved ✅");
+      toast.addToast("Saved", "success");
       setHasChanges(false);
     } catch {
-      setStatus("Error ❌");
+      toast.addToast("Error saving menu", "error");
     }
   }
 
   return (
     <Layout isLoggedIn showLogin={false}>
       <div className={styles.wrapper}>
-        <h1 className={styles.pageTitle}>Edit Menu</h1>
+        <div className={styles.pageHeader}>
+          <div>
+            <h1 className={styles.pageTitle}>Edit Menu</h1>
+          </div>
+          {qrDataUrl && (
+            <button
+              type="button"
+              className={styles.qrCard}
+              onClick={() => setQrModalOpen(true)}
+            >
+              <Image
+                src={qrDataUrl}
+                alt="Menu QR code"
+                className={styles.qrImage}
+                width={80}
+                height={80}
+              />
+            </button>
+          )}
+        </div>
 
-        <div className={styles.languageRow}>
-          <div className={styles.languageSwitcher}>
-            {languages.map((lang) => (
-              <button
-                key={lang}
-                type="button"
-                onClick={() => setLanguage(lang)}
-                className={`${styles.btn} ${styles.languageButton} ${
-                  language === lang ? styles.languageButtonActive : ""
-                }`}
-              >
-                {lang.toUpperCase()}
-              </button>
-            ))}
+        <div className={styles.topRow}>
+          <div className={styles.venueRow}>
+            <label className={styles.venueLabel} htmlFor="venueName">
+              Venue name
+            </label>
+            <input
+              id="venueName"
+              value={venueName}
+              onChange={(e) => {
+                setVenueName(e.target.value);
+                setHasChanges(true);
+              }}
+              className={styles.venueInput}
+            />
+          </div>
+          <div className={styles.languageRow}>
+            <div className={styles.languageSwitcher}>
+              {languages.map((lang) => (
+                <button
+                  key={lang}
+                  type="button"
+                  onClick={() => setLanguage(lang)}
+                  className={`${styles.btn} ${styles.languageButton} ${
+                    language === lang ? styles.languageButtonActive : ""
+                  }`}
+                >
+                  {lang.toUpperCase()}
+                </button>
+              ))}
+            </div>
           </div>
         </div>
 
-        <div className={styles.venueRow}>
+        <div className={styles.venueRowMobile}>
           <label className={styles.venueLabel} htmlFor="venueName">
             Venue name
           </label>
@@ -491,7 +683,6 @@ export default function OwnerMenuPage({
         <section className={styles.section}>
           <div className={styles.headerRow}>
             <div className={styles.headerActions}>
-              <span className={styles.statusText}>{status}</span>
               <button
                 onClick={addCategory}
                 className={`${styles.btn} ${styles.btnAccent} ${styles.btnSmall} ${styles.btnWide}`}
@@ -546,141 +737,31 @@ export default function OwnerMenuPage({
         </section>
       </div>
 
-      {renameTarget && (
-        <div
-          className={`${styles.overlay} ${
-            renameVisible ? styles.overlayVisible : ""
-          }`}
-          role="dialog"
-          aria-modal="true"
-        >
-          <div
-            className={`${styles.modal} ${
-              renameVisible ? styles.modalVisible : ""
-            }`}
-          >
-            <h3 className={styles.modalTitle}>Rename category</h3>
-            <form onSubmit={submitRename} className={styles.modalForm}>
-              <label className={styles.modalLabel}>
-                <span>New name</span>
-                <input
-                  value={renameValue}
-                  onChange={(e) => setRenameValue(e.target.value)}
-                  autoFocus
-                  className={styles.modalInput}
-                />
-              </label>
-              <div className={styles.modalActions}>
-                <button
-                  type="button"
-                  onClick={closeRename}
-                  className={`${styles.btn} ${styles.btnSubtle} ${styles.btnSmall}`}
-                >
-                  Cancel
-                </button>
-                <button
-                  type="submit"
-                  className={`${styles.btn} ${styles.btnPrimary} ${styles.btnSmall}`}
-                >
-                  Update
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
-      )}
-
-      {editTarget && (
-        <div
-          className={`${styles.overlay} ${
-            editVisible ? styles.overlayVisible : ""
-          }`}
-          role="dialog"
-          aria-modal="true"
-        >
-          <div
-            className={`${styles.modal} ${
-              editVisible ? styles.modalVisible : ""
-            }`}
-          >
-            <h3 className={styles.modalTitle}>Edit item</h3>
-            <form onSubmit={submitEdit} className={styles.modalForm}>
-              <label className={styles.modalLabel}>
-                <span>Name</span>
-                <input
-                  value={editValues.name}
-                  onChange={(e) =>
-                    setEditValues((v) => ({ ...v, name: e.target.value }))
-                  }
-                  autoFocus
-                  className={styles.modalInput}
-                  required
-                />
-              </label>
-              <label className={styles.modalLabel}>
-                <span>Price</span>
-                <input
-                  value={editValues.price}
-                  onChange={(e) =>
-                    setEditValues((v) => ({ ...v, price: e.target.value }))
-                  }
-                  className={styles.modalInput}
-                  type="number"
-                  step="0.01"
-                  min="0"
-                  required
-                />
-              </label>
-              <label className={styles.modalLabel}>
-                <span>Description</span>
-                <textarea
-                  value={editValues.description}
-                  onChange={(e) =>
-                    setEditValues((v) => ({
-                      ...v,
-                      description: e.target.value,
-                    }))
-                  }
-                  className={styles.modalInput}
-                  rows={3}
-                />
-              </label>
-              <div className={styles.modalActions}>
-                <button
-                  type="button"
-                  onClick={closeEdit}
-                  className={`${styles.btn} ${styles.btnSubtle} ${styles.btnSmall}`}
-                >
-                  Cancel
-                </button>
-                <button
-                  type="submit"
-                  className={`${styles.btn} ${styles.btnPrimary} ${styles.btnSmall}`}
-                >
-                  Update
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
-      )}
-
       <Modal
         isOpen={newCategoryOpen}
         isVisible={newCategoryVisible}
         title="Add category"
       >
         <form onSubmit={submitNewCategory} className={styles.modalForm}>
-          <label className={styles.modalLabel}>
-            <span>Name</span>
-            <input
-              value={newCategoryName}
-              onChange={(e) => setNewCategoryName(e.target.value)}
-              autoFocus
-              className={styles.modalInput}
-              required
-            />
-          </label>
+          <div className={styles.translationGrid}>
+            {languages.map((lang, idx) => (
+              <label key={lang} className={styles.modalLabel}>
+                <span>{lang.toUpperCase()}</span>
+                <input
+                  value={newCategoryTranslations[lang] ?? ""}
+                  onChange={(e) =>
+                    setNewCategoryTranslations((prev) => ({
+                      ...prev,
+                      [lang]: e.target.value,
+                    }))
+                  }
+                  className={styles.modalInput}
+                  autoFocus={idx === 0}
+                  required
+                />
+              </label>
+            ))}
+          </div>
           <div className={styles.modalActions}>
             <button
               type="button"
@@ -705,15 +786,27 @@ export default function OwnerMenuPage({
         title="Rename category"
       >
         <form onSubmit={submitRename} className={styles.modalForm}>
-          <label className={styles.modalLabel}>
-            <span>New name</span>
-            <input
-              value={renameValue}
-              onChange={(e) => setRenameValue(e.target.value)}
-              autoFocus
-              className={styles.modalInput}
-            />
-          </label>
+          <div
+            className={`${styles.translationGrid} ${styles.translationSection}`}
+          >
+            {languages.map((lang, idx) => (
+              <label key={lang} className={styles.modalLabel}>
+                <span>{lang.toUpperCase()}</span>
+                <input
+                  value={renameTranslations[lang] ?? ""}
+                  onChange={(e) =>
+                    setRenameTranslations((prev) => ({
+                      ...prev,
+                      [lang]: e.target.value,
+                    }))
+                  }
+                  className={styles.modalInput}
+                  autoFocus={idx === 0}
+                  required
+                />
+              </label>
+            ))}
+          </div>
           <div className={styles.modalActions}>
             <button
               type="button"
@@ -738,12 +831,29 @@ export default function OwnerMenuPage({
         title="Edit item"
       >
         <form onSubmit={submitEdit} className={styles.modalForm}>
+          <div className={styles.translationTabs}>
+            {languages.map((lang) => (
+              <button
+                key={lang}
+                type="button"
+                className={`${styles.translationTab} ${
+                  editLanguageTab === lang ? styles.translationTabActive : ""
+                }`}
+                onClick={() => setEditLanguageTab(lang)}
+              >
+                {lang.toUpperCase()}
+              </button>
+            ))}
+          </div>
           <label className={styles.modalLabel}>
-            <span>Name</span>
+            <span>Name ({editLanguageTab.toUpperCase()})</span>
             <input
-              value={editValues.name}
+              value={editValues.names[editLanguageTab] ?? ""}
               onChange={(e) =>
-                setEditValues((v) => ({ ...v, name: e.target.value }))
+                setEditValues((v) => ({
+                  ...v,
+                  names: { ...v.names, [editLanguageTab]: e.target.value },
+                }))
               }
               autoFocus
               className={styles.modalInput}
@@ -765,13 +875,16 @@ export default function OwnerMenuPage({
             />
           </label>
           <label className={styles.modalLabel}>
-            <span>Description</span>
+            <span>Description ({editLanguageTab.toUpperCase()})</span>
             <textarea
-              value={editValues.description}
+              value={editValues.descriptions[editLanguageTab] ?? ""}
               onChange={(e) =>
                 setEditValues((v) => ({
                   ...v,
-                  description: e.target.value,
+                  descriptions: {
+                    ...v.descriptions,
+                    [editLanguageTab]: e.target.value,
+                  },
                 }))
               }
               className={styles.modalInput}
@@ -779,13 +892,18 @@ export default function OwnerMenuPage({
             />
           </label>
           <label className={styles.modalLabel}>
-            <span>Ingredients (comma separated)</span>
+            <span>
+              Ingredients ({editLanguageTab.toUpperCase()}) (comma separated)
+            </span>
             <textarea
-              value={editValues.ingredients}
+              value={editValues.ingredients[editLanguageTab] ?? ""}
               onChange={(e) =>
                 setEditValues((v) => ({
                   ...v,
-                  ingredients: e.target.value,
+                  ingredients: {
+                    ...v.ingredients,
+                    [editLanguageTab]: e.target.value,
+                  },
                 }))
               }
               className={styles.modalInput}
@@ -817,12 +935,29 @@ export default function OwnerMenuPage({
         title="Add item"
       >
         <form onSubmit={submitAdd} className={styles.modalForm}>
+          <div className={styles.translationTabs}>
+            {languages.map((lang) => (
+              <button
+                key={lang}
+                type="button"
+                className={`${styles.translationTab} ${
+                  addLanguageTab === lang ? styles.translationTabActive : ""
+                }`}
+                onClick={() => setAddLanguageTab(lang)}
+              >
+                {lang.toUpperCase()}
+              </button>
+            ))}
+          </div>
           <label className={styles.modalLabel}>
-            <span>Name</span>
+            <span>Name ({addLanguageTab.toUpperCase()})</span>
             <input
-              value={addValues.name}
+              value={addValues.names[addLanguageTab] ?? ""}
               onChange={(e) =>
-                setAddValues((v) => ({ ...v, name: e.target.value }))
+                setAddValues((v) => ({
+                  ...v,
+                  names: { ...v.names, [addLanguageTab]: e.target.value },
+                }))
               }
               autoFocus
               className={styles.modalInput}
@@ -844,13 +979,16 @@ export default function OwnerMenuPage({
             />
           </label>
           <label className={styles.modalLabel}>
-            <span>Description</span>
+            <span>Description ({addLanguageTab.toUpperCase()})</span>
             <textarea
-              value={addValues.description}
+              value={addValues.descriptions[addLanguageTab] ?? ""}
               onChange={(e) =>
                 setAddValues((v) => ({
                   ...v,
-                  description: e.target.value,
+                  descriptions: {
+                    ...v.descriptions,
+                    [addLanguageTab]: e.target.value,
+                  },
                 }))
               }
               className={styles.modalInput}
@@ -858,13 +996,18 @@ export default function OwnerMenuPage({
             />
           </label>
           <label className={styles.modalLabel}>
-            <span>Ingredients (comma separated)</span>
+            <span>
+              Ingredients ({addLanguageTab.toUpperCase()}) (comma separated)
+            </span>
             <textarea
-              value={addValues.ingredients}
+              value={addValues.ingredients[addLanguageTab] ?? ""}
               onChange={(e) =>
                 setAddValues((v) => ({
                   ...v,
-                  ingredients: e.target.value,
+                  ingredients: {
+                    ...v.ingredients,
+                    [addLanguageTab]: e.target.value,
+                  },
                 }))
               }
               className={styles.modalInput}
@@ -955,6 +1098,34 @@ export default function OwnerMenuPage({
           </div>
         </form>
       </Modal>
+
+      <Modal isOpen={qrModalOpen} isVisible={qrModalOpen} title="">
+        <div className={styles.qrModalBody}>
+          {qrDataUrl && (
+            <Image
+              src={qrDataUrl}
+              alt="Menu QR code large"
+              className={styles.qrImageLarge}
+              width={240}
+              height={240}
+            />
+          )}
+          {qrUrl && (
+            <a href={qrUrl} target="_blank" rel="noopener noreferrer">
+              {qrUrl}
+            </a>
+          )}
+        </div>
+        <div className={styles.modalActions}>
+          <button
+            type="button"
+            onClick={() => setQrModalOpen(false)}
+            className={`${styles.btn} ${styles.btnPrimary} ${styles.btnSmall}`}
+          >
+            Close
+          </button>
+        </div>
+      </Modal>
     </Layout>
   );
 }
@@ -972,19 +1143,38 @@ export const getServerSideProps: GetServerSideProps<Props> = async (ctx) => {
   const venueId = session.venueId;
   const db = await getDb();
 
+  const tokenDoc = await db.collection("public_tokens").findOne({
+    venueId: session.venueId,
+    active: true,
+  });
+
   const venue = await db
     .collection("venues")
     .findOne({ _id: new ObjectId(venueId) });
   if (!venue) return { notFound: true };
 
   const menu: Menu = venue.menu ?? { categories: [] };
+  const languages = Array.isArray(venue.langs)
+    ? venue.langs
+    : ["en", "tr", "de"];
+
+  let qrUrl: string | undefined;
+  let qrDataUrl: string | undefined;
+
+  if (tokenDoc) {
+    qrUrl = `${
+      process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000"
+    }/menu/${tokenDoc.token}`;
+    qrDataUrl = await QRCode.toDataURL(qrUrl, { width: 180, margin: 1 });
+  }
 
   return {
     props: {
       venueId,
       venueName: venue.name ?? "Venue",
       menu,
-      languages: Array.isArray(venue.langs) ? venue.langs : ["en", "tr", "de"],
+      languages,
+      ...(qrUrl && qrDataUrl ? { qrUrl, qrDataUrl } : {}),
     },
   };
 };
