@@ -4,10 +4,14 @@ import { useRouter } from "next/router";
 import { ReactNode, useEffect, useRef, useState } from "react";
 
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faRightFromBracket, faRightToBracket, faUtensils } from "@fortawesome/free-solid-svg-icons";
+import {
+  faRightFromBracket,
+  faRightToBracket,
+  faUtensils,
+} from "@fortawesome/free-solid-svg-icons";
 
 import styles from "./layout.module.scss";
-import logo from "@/assets/leziz-logo.png";
+import logo from "@/assets/lzz.png";
 import { useI18n } from "@/lib/i18n";
 
 type LayoutProps = {
@@ -76,11 +80,10 @@ export default function Layout({
               src={logo}
               alt="Leziz logo"
               className={styles.brandLogo}
-              width={48}
-              height={48}
+              width={150}
+              height={96}
               priority
             />
-            <span className={styles.brandText}>Leziz</span>
           </Link>
           <div className={styles.links}>
             {shouldShowLogin && (

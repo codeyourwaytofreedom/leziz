@@ -5,7 +5,7 @@ import { ObjectId } from "mongodb";
 import { getDb } from "@/lib/mongodb";
 import styles from "@/styles/publicMenu.module.scss";
 import { LocalizedText, Menu } from "@/types/menu";
-import logo from "@/assets/leziz-logo.png";
+import logo from "@/assets/lzz.png";
 
 type Props = {
   menu: Menu;
@@ -18,11 +18,19 @@ function resolveText(value: LocalizedText | undefined, lang: Language) {
   if (!value) return "";
   if (typeof value === "string") return value;
   return (
-    value[lang] ?? value.en ?? value.tr ?? value.de ?? Object.values(value)[0] ?? ""
+    value[lang] ??
+    value.en ??
+    value.tr ??
+    value.de ??
+    Object.values(value)[0] ??
+    ""
   );
 }
 
-export default function MenuPage({ menu, languages: providedLanguages }: Props) {
+export default function MenuPage({
+  menu,
+  languages: providedLanguages,
+}: Props) {
   const languages =
     providedLanguages && providedLanguages.length > 0
       ? providedLanguages
@@ -131,7 +139,9 @@ export const getServerSideProps: GetServerSideProps<Props> = async (ctx) => {
     .findOne({ _id: new ObjectId(tokenDoc.venueId) });
   if (!venue) return { notFound: true };
 
-  const languages = Array.isArray(venue.langs) ? venue.langs : ["en", "tr", "de"];
+  const languages = Array.isArray(venue.langs)
+    ? venue.langs
+    : ["en", "tr", "de"];
 
   return {
     props: {
