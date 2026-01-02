@@ -5,10 +5,10 @@ import Link from "next/link";
 import Layout from "@/layout/layout";
 import { getSession } from "@/lib/session";
 import styles from "@/styles/home.module.scss";
-import waiterImg from "@/assets/landingPage/waiter-serving-friends-at-pub.jpg";
-import corridorHeroImg from "@/assets/landingPage/cozy-restaurant-corridor-tables.jpg";
-import ambienceImg from "@/assets/landingPage/restaurant-with-green-wall-wooden-table-with-row-tables-planter-with-plant-background.jpg";
-import friendsImg from "@/assets/landingPage/group-friends-eating-restaurant.jpg";
+import waiterImg from "@/assets/landingPage/waiter-service.jpg";
+import corridorHeroImg from "@/assets/landingPage/corridor-cozy.jpg";
+import ambienceImg from "@/assets/landingPage/green-restaurant.jpg";
+import friendsImg from "@/assets/landingPage/friends-dining.jpg";
 
 type HomeProps = {
   isLoggedIn: boolean;
@@ -62,6 +62,7 @@ export default function Home({ isLoggedIn }: HomeProps) {
                 className={styles.heroImage}
                 placeholder="blur"
                 priority
+                sizes="(min-width: 1024px) 420px, (min-width: 768px) 360px, 90vw"
               />
               <div className={styles.heroCaption}>
                 A menu that feels as inviting as your space.
@@ -75,6 +76,7 @@ export default function Home({ isLoggedIn }: HomeProps) {
             alt="Waiter serving friends at a pub"
             className={`${styles.heroImage} ${styles.heroImageWide}`}
             placeholder="blur"
+            sizes="(min-width: 1024px) 680px, 100vw"
           />
           <div className={styles.heroCaption}>Staff-friendly QR menus.</div>
         </div>
@@ -130,6 +132,7 @@ export default function Home({ isLoggedIn }: HomeProps) {
                 alt="Restaurant with warm green wall and wooden tables"
                 className={styles.galleryImage}
                 placeholder="blur"
+                sizes="(min-width: 1024px) 480px, (min-width: 768px) 50vw, 100vw"
               />
               <div className={styles.galleryText}>
                 <h3>Ambience first</h3>
@@ -145,6 +148,7 @@ export default function Home({ isLoggedIn }: HomeProps) {
                 alt="Friends enjoying a meal together at a restaurant"
                 className={styles.galleryImage}
                 placeholder="blur"
+                sizes="(min-width: 1024px) 480px, (min-width: 768px) 50vw, 100vw"
               />
               <div className={styles.galleryText}>
                 <h3>Service-ready</h3>
