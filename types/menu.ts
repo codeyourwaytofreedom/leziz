@@ -1,13 +1,16 @@
+export type LocalizedText = string | Record<string, string>;
+
 export type MenuItem = {
   id: string;
-  name: string;
+  name: LocalizedText;
   price: number;
-  description?: string;
+  description?: LocalizedText;
+  ingredients?: string[];
 };
 
 export type Category = {
   id: string;
-  title: string;
+  title: LocalizedText;
   items: MenuItem[];
 };
 

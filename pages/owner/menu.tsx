@@ -10,11 +10,11 @@ import Layout from "@/layout/layout";
 import { CategoryCard } from "@/components/menu/CategoryCard";
 import { Modal } from "@/components/menu/Modal";
 import styles from "@/styles/menu/menu.module.scss";
-import { Category, Menu, MenuItem } from "@/types/menu";
+import { Category, Menu, MenuItem, LocalizedText } from "@/types/menu";
 
 type Props = {
   venueId: string; // ObjectId as string
-  venueName: string;
+  venueName: LocalizedText;
   menu: Menu;
 };
 
@@ -25,12 +25,18 @@ function uid(prefix = "id") {
     .slice(2)}_${Date.now().toString(16)}`;
 }
 
+function resolveText(value?: LocalizedText) {
+  if (!value) return "";
+  if (typeof value === "string") return value;
+  return value.en ?? value.tr ?? value.de ?? Object.values(value)[0] ?? "";
+}
+
 export default function OwnerMenuPage({
   venueId,
   venueName: initialVenueName,
   menu: initialMenu,
 }: Props) {
-  const [venueName, setVenueName] = useState(initialVenueName);
+  const [venueName, setVenueName] = useState(resolveText(initialVenueName));
   const [menu, setMenu] = useState<Menu>(initialMenu);
   const [hasChanges, setHasChanges] = useState(false);
 
@@ -50,7 +56,8 @@ export default function OwnerMenuPage({
     name: string;
     price: string;
     description: string;
-  }>({ name: "", price: "", description: "" });
+    ingredients: string;
+  }>({ name: "", price: "", description: "", ingredients: "" });
   const [addVisible, setAddVisible] = useState(false);
   const [editTarget, setEditTarget] = useState<{
     catId: string;
@@ -60,7 +67,8 @@ export default function OwnerMenuPage({
     name: string;
     price: string;
     description: string;
-  }>({ name: "", price: "", description: "" });
+    ingredients: string;
+  }>({ name: "", price: "", description: "", ingredients: "" });
   const [editVisible, setEditVisible] = useState(false);
   const [deleteTarget, setDeleteTarget] = useState<{
     catId: string;
@@ -86,19 +94,20 @@ export default function OwnerMenuPage({
   function renameCategory(catId: string) {
     const cat = menu.categories.find((c) => c.id === catId);
     if (!cat) return;
-    setRenameTarget({ id: catId, name: cat.title });
-    setRenameValue(cat.title);
+    const displayTitle = resolveText(cat.title);
+    setRenameTarget({ id: catId, name: displayTitle });
+    setRenameValue(displayTitle);
   }
 
   function deleteCategory(catId: string) {
     const cat = menu.categories.find((c) => c.id === catId);
     if (!cat) return;
-    setDeleteCategoryTarget({ catId, title: cat.title });
+    setDeleteCategoryTarget({ catId, title: resolveText(cat.title) });
   }
 
   function addItem(catId: string) {
     setAddTarget({ catId });
-    setAddValues({ name: "", price: "", description: "" });
+    setAddValues({ name: "", price: "", description: "", ingredients: "" });
   }
 
   function submitAdd(e: React.FormEvent) {
@@ -112,8 +121,19 @@ export default function OwnerMenuPage({
     if (Number.isNaN(price)) return;
 
     const description = addValues.description.trim() || undefined;
+    const ingredientsList = addValues.ingredients
+      .split(",")
+      .map((ing) => ing.trim())
+      .filter(Boolean);
+    const ingredients = ingredientsList.length ? ingredientsList : undefined;
 
-    const item: MenuItem = { id: uid("item"), name, price, description };
+    const item: MenuItem = {
+      id: uid("item"),
+      name,
+      price,
+      description,
+      ingredients,
+    };
 
     setMenu((m) => ({
       ...m,
@@ -126,7 +146,7 @@ export default function OwnerMenuPage({
     setAddVisible(false);
     setTimeout(() => {
       setAddTarget(null);
-      setAddValues({ name: "", price: "", description: "" });
+      setAddValues({ name: "", price: "", description: "", ingredients: "" });
     }, 200);
   }
 
@@ -134,7 +154,7 @@ export default function OwnerMenuPage({
     setAddVisible(false);
     setTimeout(() => {
       setAddTarget(null);
-      setAddValues({ name: "", price: "", description: "" });
+      setAddValues({ name: "", price: "", description: "", ingredients: "" });
     }, 200);
   }
 
@@ -250,9 +270,10 @@ export default function OwnerMenuPage({
 
     setEditTarget({ catId, itemId });
     setEditValues({
-      name: item.name,
+      name: resolveText(item.name),
       price: String(item.price),
-      description: item.description ?? "",
+      description: resolveText(item.description),
+      ingredients: item.ingredients?.join(", ") ?? "",
     });
   }
 
@@ -323,6 +344,11 @@ export default function OwnerMenuPage({
     if (Number.isNaN(price)) return;
 
     const description = editValues.description.trim();
+    const ingredientsList = editValues.ingredients
+      .split(",")
+      .map((ing) => ing.trim())
+      .filter(Boolean);
+    const ingredients = ingredientsList.length ? ingredientsList : undefined;
 
     setMenu((m) => ({
       ...m,
@@ -337,6 +363,7 @@ export default function OwnerMenuPage({
                   name,
                   price,
                   description: description || undefined,
+                  ingredients,
                 }
               : i
           ),
@@ -348,7 +375,7 @@ export default function OwnerMenuPage({
     setEditVisible(false);
     setTimeout(() => {
       setEditTarget(null);
-      setEditValues({ name: "", price: "", description: "" });
+      setEditValues({ name: "", price: "", description: "", ingredients: "" });
     }, 200);
   }
 
@@ -356,7 +383,7 @@ export default function OwnerMenuPage({
     setEditVisible(false);
     setTimeout(() => {
       setEditTarget(null);
-      setEditValues({ name: "", price: "", description: "" });
+      setEditValues({ name: "", price: "", description: "", ingredients: "" });
     }, 200);
   }
 
@@ -444,7 +471,7 @@ export default function OwnerMenuPage({
                   setDeleteTarget({
                     catId: c.id,
                     itemId,
-                    name: item?.name ?? "Item",
+                    name: resolveText(item?.name) || "Item",
                   });
                 }}
               />
@@ -685,6 +712,21 @@ export default function OwnerMenuPage({
               rows={3}
             />
           </label>
+          <label className={styles.modalLabel}>
+            <span>Ingredients (comma separated)</span>
+            <textarea
+              value={editValues.ingredients}
+              onChange={(e) =>
+                setEditValues((v) => ({
+                  ...v,
+                  ingredients: e.target.value,
+                }))
+              }
+              className={styles.modalInput}
+              rows={2}
+              placeholder="e.g. tomato, basil, mozzarella"
+            />
+          </label>
           <div className={styles.modalActions}>
             <button
               type="button"
@@ -747,6 +789,21 @@ export default function OwnerMenuPage({
               }
               className={styles.modalInput}
               rows={3}
+            />
+          </label>
+          <label className={styles.modalLabel}>
+            <span>Ingredients (comma separated)</span>
+            <textarea
+              value={addValues.ingredients}
+              onChange={(e) =>
+                setAddValues((v) => ({
+                  ...v,
+                  ingredients: e.target.value,
+                }))
+              }
+              className={styles.modalInput}
+              rows={2}
+              placeholder="e.g. tomato, basil, mozzarella"
             />
           </label>
           <div className={styles.modalActions}>

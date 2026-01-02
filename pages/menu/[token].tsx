@@ -3,12 +3,18 @@ import { GetServerSideProps } from "next";
 import { ObjectId } from "mongodb";
 import { getDb } from "@/lib/mongodb";
 import styles from "@/styles/publicMenu.module.scss";
-import { Menu } from "@/types/menu";
+import { Menu, MenuItem } from "@/types/menu";
 import logo from "@/assets/leziz-logo.png";
 
 type Props = {
   menu: Menu;
 };
+
+function resolveText(value?: MenuItem["name"] | MenuItem["description"]) {
+  if (!value) return "";
+  if (typeof value === "string") return value;
+  return value.en ?? value.tr ?? value.de ?? Object.values(value)[0] ?? "";
+}
 
 export default function MenuPage({ menu }: Props) {
   return (
@@ -17,7 +23,7 @@ export default function MenuPage({ menu }: Props) {
         {menu.categories.map((cat) => (
           <section key={cat.id} className={styles.section}>
             <div className={styles.sectionHeader}>
-              <h2 className={styles.sectionTitle}>{cat.title}</h2>
+              <h2 className={styles.sectionTitle}>{resolveText(cat.title)}</h2>
             </div>
             <div className={styles.items}>
               {cat.items.map((item) => (
@@ -25,18 +31,32 @@ export default function MenuPage({ menu }: Props) {
                   <div className={styles.itemImageWrap}>
                     <Image
                       src={logo}
-                      alt={`${item.name} placeholder`}
+                      alt={`${resolveText(item.name)} placeholder`}
                       fill
-                      sizes="96px"
+                      sizes="140px"
                       className={styles.itemImage}
                     />
                   </div>
-                  <div>
-                    <p className={styles.itemName}>{item.name}</p>
-                    {item.description && (
+                  <div className={styles.itemBody}>
+                    <p className={styles.itemName}>{resolveText(item.name)}</p>
+                    {resolveText(item.description) && (
                       <p className={styles.itemDescription}>
-                        {item.description}
+                        {resolveText(item.description)}
                       </p>
+                    )}
+                    {item.ingredients && item.ingredients.length > 0 && (
+                      <div className={styles.itemIngredients}>
+                        <span className={styles.ingredientsLabel}>
+                          Ingredients:
+                        </span>
+                        <div className={styles.ingredientsList}>
+                          {item.ingredients.map((ing) => (
+                            <span key={ing} className={styles.ingredientPill}>
+                              {ing}
+                            </span>
+                          ))}
+                        </div>
+                      </div>
                     )}
                   </div>
                   <div className={styles.itemPrice}>

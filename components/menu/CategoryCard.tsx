@@ -1,8 +1,18 @@
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faPen, faTrash, faChevronRight } from "@fortawesome/free-solid-svg-icons";
+import {
+  faPen,
+  faTrash,
+  faChevronRight,
+} from "@fortawesome/free-solid-svg-icons";
 
 import { Category, MenuItem } from "@/types/menu";
 import styles from "@/styles/menu/menu.module.scss";
+
+function resolveText(value?: MenuItem["name"] | MenuItem["description"]) {
+  if (!value) return "";
+  if (typeof value === "string") return value;
+  return value.en ?? value.tr ?? value.de ?? Object.values(value)[0] ?? "";
+}
 
 type ItemCardProps = {
   item: MenuItem;
@@ -11,12 +21,24 @@ type ItemCardProps = {
 };
 
 function ItemCard({ item, onEdit, onDelete }: ItemCardProps) {
+  const displayName = resolveText(item.name);
+  const displayDescription = resolveText(item.description);
+
   return (
     <div className={styles.itemCard}>
       <div className={styles.itemInfo}>
-        <b>{item.name}</b>
-        {item.description ? (
-          <div className={styles.itemDescription}>{item.description}</div>
+        <b>{displayName}</b>
+        {displayDescription ? (
+          <div className={styles.itemDescription}>{displayDescription}</div>
+        ) : null}
+        {item.ingredients && item.ingredients.length > 0 ? (
+          <div className={styles.itemIngredients}>
+            {item.ingredients.map((ing) => (
+              <span key={ing} className={styles.ingredientPill}>
+                {ing}
+              </span>
+            ))}
+          </div>
         ) : null}
       </div>
       <div className={styles.itemMeta}>
@@ -24,7 +46,7 @@ function ItemCard({ item, onEdit, onDelete }: ItemCardProps) {
         <div className={styles.itemActions}>
           <button
             onClick={onEdit}
-            className={`${styles.btn} ${styles.btnSubtle} ${styles.btnIcon}`}
+            className={`${styles.btn} ${styles.btnSubtleDark} ${styles.btnIcon}`}
             aria-label="Edit item"
           >
             <FontAwesomeIcon icon={faPen} />
@@ -63,6 +85,8 @@ export function CategoryCard({
   onEditItem,
   onDeleteItem,
 }: CategoryCardProps) {
+  const displayTitle = resolveText(category.title);
+
   return (
     <div
       className={`${styles.categoryCard} ${
@@ -72,12 +96,14 @@ export function CategoryCard({
       <div className={styles.categoryHeader}>
         <button onClick={onToggle} className={styles.categoryToggle}>
           <span
-            className={`${styles.chevron} ${isExpanded ? styles.chevronExpanded : ""}`}
+            className={`${styles.chevron} ${
+              isExpanded ? styles.chevronExpanded : ""
+            }`}
             aria-hidden
           >
             <FontAwesomeIcon icon={faChevronRight} />
           </span>
-          {category.title}
+          {displayTitle}
         </button>
         {isExpanded && (
           <div className={styles.categoryActions}>

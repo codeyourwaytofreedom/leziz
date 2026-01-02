@@ -6,21 +6,35 @@ import { ObjectId } from "mongodb";
 import { getDb } from "@/lib/mongodb";
 import { getSession } from "@/lib/session";
 import Layout from "@/layout/layout";
+import { LocalizedText } from "@/types/menu";
 
 type Props = {
   url: string;
   qrDataUrl: string;
-  venueName: string;
+  venueName: LocalizedText;
 };
 
+function resolveText(value?: LocalizedText) {
+  if (!value) return "";
+  if (typeof value === "string") return value;
+  return value.en ?? value.tr ?? value.de ?? Object.values(value)[0] ?? "";
+}
+
 export default function OwnerQrPage({ url, qrDataUrl, venueName }: Props) {
+  const displayName = resolveText(venueName);
+
   return (
     <Layout isLoggedIn showLogin={false}>
       <main style={{ padding: 24 }}>
-        <h1>QR – {venueName}</h1>
+        <h1>QR – {displayName}</h1>
         <p>{url}</p>
 
-        <Image src={qrDataUrl} alt="QR" width={300} height={300} />
+        <Image
+          src={qrDataUrl}
+          alt={`QR code for ${displayName || "venue"}`}
+          width={300}
+          height={300}
+        />
       </main>
     </Layout>
   );

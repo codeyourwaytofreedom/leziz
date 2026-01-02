@@ -2,16 +2,19 @@ import type { NextApiRequest, NextApiResponse } from "next";
 import { ObjectId } from "mongodb";
 import { getDb } from "@/lib/mongodb";
 
+type LocalizedText = string | Record<string, string>;
+
 type MenuItem = {
   id: string;
-  name: string;
+  name: LocalizedText;
   price: number;
-  description?: string;
+  description?: LocalizedText;
+  ingredients?: string[];
 };
 
 type Category = {
   id: string;
-  title: string;
+  title: LocalizedText;
   items: MenuItem[];
 };
 
