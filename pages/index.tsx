@@ -1,6 +1,7 @@
 import { GetServerSideProps } from "next";
 import Image from "next/image";
 import Link from "next/link";
+import Head from "next/head";
 
 import Layout from "@/layout/layout";
 import { getSession } from "@/lib/session";
@@ -9,17 +10,21 @@ import waiterImg from "@/assets/landingPage/waiter-service.jpg";
 import corridorHeroImg from "@/assets/landingPage/corridor-cozy.jpg";
 import ambienceImg from "@/assets/landingPage/green-restaurant.jpg";
 import friendsImg from "@/assets/landingPage/friends-dining.jpg";
-import Head from "next/head";
+import { useI18n } from "@/lib/i18n";
+import { getDb } from "@/lib/mongodb";
+import { ObjectId } from "mongodb";
 
 type HomeProps = {
   isLoggedIn: boolean;
+  venueName: string | null;
 };
 
-export default function Home({ isLoggedIn }: HomeProps) {
+export default function Home({ isLoggedIn, venueName }: HomeProps) {
+  const { t } = useI18n();
   const primaryCta = isLoggedIn ? "/owner/menu" : "/login";
 
   return (
-    <Layout isLoggedIn={isLoggedIn}>
+    <Layout isLoggedIn={isLoggedIn} venueName={venueName ?? undefined}>
       <Head>
         <title>Leziz | Multilingual QR Menus for Restaurants</title>
         <meta
@@ -39,35 +44,29 @@ export default function Home({ isLoggedIn }: HomeProps) {
       <div className={styles.page}>
         <section className={styles.hero}>
           <div className={styles.heroContent}>
-            <p className={styles.eyebrow}>Menus that speak every language</p>
-            <h1 className={styles.title}>
-              Serve guests faster with a beautifully translated digital menu.
-            </h1>
-            <p className={styles.subtitle}>
-              Build, translate, and publish your menu in minutes. Share with a
-              QR code, update pricing on the fly, and keep guests in the loop in
-              their own language.
-            </p>
+            <p className={styles.eyebrow}>{t("home.tagline")}</p>
+            <h1 className={styles.title}>{t("home.title")}</h1>
+            <p className={styles.subtitle}>{t("home.subtitle")}</p>
             <div className={styles.ctaRow}>
               <Link href={primaryCta} className={styles.primaryCta}>
-                Get started
+                {t("home.cta.primary")}
               </Link>
               <Link href="/menu/demo66" className={styles.secondaryCta}>
-                See a live menu
+                {t("home.cta.secondary")}
               </Link>
             </div>
             <div className={styles.stats}>
               <div>
                 <strong>3+</strong>
-                <span>Languages per menu</span>
+                <span>{t("home.stats.languages")}</span>
               </div>
               <div>
                 <strong>1 click</strong>
-                <span>QR updates</span>
+                <span>{t("home.stats.qr")}</span>
               </div>
               <div>
                 <strong>0 hassle</strong>
-                <span>No PDF uploads</span>
+                <span>{t("home.stats.nopdf")}</span>
               </div>
             </div>
           </div>
@@ -82,7 +81,7 @@ export default function Home({ isLoggedIn }: HomeProps) {
                 sizes="(min-width: 1024px) 420px, (min-width: 768px) 360px, 90vw"
               />
               <div className={styles.heroCaption}>
-                A menu that feels as inviting as your space.
+                {t("home.hero.caption")}
               </div>
             </div>
           </div>
@@ -100,47 +99,32 @@ export default function Home({ isLoggedIn }: HomeProps) {
 
         <section className={styles.section}>
           <div className={styles.sectionHeader}>
-            <h2>Everything you need to run a modern menu</h2>
-            <p>
-              Build categories, price dishes, and translate instantly. Your
-              guests see a polished experience; your team gets a simple editor.
-            </p>
+            <h2>{t("home.section.features.title")}</h2>
+            <p>{t("home.section.features.subtitle")}</p>
           </div>
           <div className={styles.featureGrid}>
             <div className={styles.featureCard}>
               <div className={styles.pill}>Translations</div>
-              <h3>Localized by design</h3>
-              <p>
-                Edit in one language and keep translations side by side. Switch
-                the editor language to verify every detail before publishing.
-              </p>
+              <h3>{t("home.feature.translations.title")}</h3>
+              <p>{t("home.feature.translations.desc")}</p>
             </div>
             <div className={styles.featureCard}>
               <div className={styles.pill}>QR &amp; Sharing</div>
-              <h3>QRs that never go stale</h3>
-              <p>
-                Share one QR and keep updating your menu. Guests always see the
-                latest prices, specials, and dietary notes.
-              </p>
+              <h3>{t("home.feature.qr.title")}</h3>
+              <p>{t("home.feature.qr.desc")}</p>
             </div>
             <div className={styles.featureCard}>
               <div className={styles.pill}>Control</div>
-              <h3>Real-time pricing</h3>
-              <p>
-                Change prices mid-service, hide sold-out items, or add a new
-                special in seconds—no design software required.
-              </p>
+              <h3>{t("home.feature.control.title")}</h3>
+              <p>{t("home.feature.control.desc")}</p>
             </div>
           </div>
         </section>
 
         <section className={styles.section}>
           <div className={styles.sectionHeader}>
-            <h2>Built for dining rooms and patios</h2>
-            <p>
-              From cozy bistros to lively pubs, deliver a consistent digital
-              menu that feels premium and personal.
-            </p>
+            <h2>{t("home.section.gallery.title")}</h2>
+            <p>{t("home.section.gallery.subtitle")}</p>
           </div>
           <div className={styles.gallery}>
             <div className={styles.galleryCard}>
@@ -152,11 +136,8 @@ export default function Home({ isLoggedIn }: HomeProps) {
                 sizes="(min-width: 1024px) 480px, (min-width: 768px) 50vw, 100vw"
               />
               <div className={styles.galleryText}>
-                <h3>Ambience first</h3>
-                <p>
-                  Clean layouts that let your food and atmosphere shine—no
-                  clutter, just clarity.
-                </p>
+                <h3>{t("home.gallery.ambience.title")}</h3>
+                <p>{t("home.gallery.ambience.desc")}</p>
               </div>
             </div>
             <div className={styles.galleryCard}>
@@ -168,11 +149,8 @@ export default function Home({ isLoggedIn }: HomeProps) {
                 sizes="(min-width: 1024px) 480px, (min-width: 768px) 50vw, 100vw"
               />
               <div className={styles.galleryText}>
-                <h3>Service-ready</h3>
-                <p>
-                  Fast to load, easy to scan, and effortless for staff to point
-                  guests to the right dish.
-                </p>
+                <h3>{t("home.gallery.service.title")}</h3>
+                <p>{t("home.gallery.service.desc")}</p>
               </div>
             </div>
           </div>
@@ -186,10 +164,22 @@ export const getServerSideProps: GetServerSideProps<HomeProps> = async (
   ctx
 ) => {
   const session = getSession(ctx.req);
+  let venueName: string | undefined;
+
+  if (session?.venueId) {
+    const db = await getDb();
+    const venue = await db
+      .collection("venues")
+      .findOne({ _id: new ObjectId(session.venueId) });
+    if (venue?.name) {
+      venueName = typeof venue.name === "string" ? venue.name : venue.name.en;
+    }
+  }
 
   return {
     props: {
       isLoggedIn: Boolean(session),
+      venueName: venueName ?? null,
     },
   };
 };

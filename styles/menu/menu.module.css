@@ -36,6 +36,25 @@
   padding: 0.25rem;
 }
 
+.qrModalBody {
+  display: grid;
+  gap: 0.75rem;
+  justify-items: center;
+  text-align: center;
+  word-break: break-all;
+}
+
+.qrImage {
+  width: 80px;
+  height: 80px;
+  display: block;
+}
+
+.qrImageLarge {
+  width: 240px;
+  height: 240px;
+}
+
 .qrImage {
   width: 80px;
   height: 80px;
@@ -469,13 +488,26 @@
   background: transparent;
   color: var(--color-text-muted);
   font-weight: 700;
-  padding: 0.25rem 0.4rem 0.2rem;
+  padding: 0.35rem 0.6rem 0.3rem;
   cursor: default;
+  border-radius: 8px;
 }
 
 .translationTabActive {
   color: var(--color-text);
-  border-bottom: 2px solid var(--color-text);
+  background: var(--color-surface-muted);
+  border: 1px solid var(--color-border);
+}
+
+.translationGrid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 10px;
+}
+
+.translationSection {
+  display: grid;
+  gap: 10px;
 }
 
 .modalLabel {

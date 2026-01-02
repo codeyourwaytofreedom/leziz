@@ -4,6 +4,7 @@ import type { AppProps } from "next/app";
 import { Roboto } from "next/font/google";
 import { config } from "@fortawesome/fontawesome-svg-core";
 import { ToastProvider } from "@/lib/toast";
+import { I18nProvider } from "@/lib/i18n";
 
 const roboto = Roboto({
   subsets: ["latin"],
@@ -16,9 +17,11 @@ config.autoAddCss = false;
 export default function App({ Component, pageProps }: AppProps) {
   return (
     <main className={roboto.className}>
-      <ToastProvider>
-        <Component {...pageProps} />
-      </ToastProvider>
+      <I18nProvider>
+        <ToastProvider>
+          <Component {...pageProps} />
+        </ToastProvider>
+      </I18nProvider>
     </main>
   );
 }

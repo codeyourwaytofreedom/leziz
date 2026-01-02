@@ -26,9 +26,10 @@ type ItemCardProps = {
   onEdit: () => void;
   onDelete: () => void;
   language: Language;
+  t: (key: string) => string;
 };
 
-function ItemCard({ item, onEdit, onDelete, language }: ItemCardProps) {
+function ItemCard({ item, onEdit, onDelete, language, t }: ItemCardProps) {
   const displayName = resolveText(item.name, language);
   const displayDescription = resolveText(item.description, language);
 
@@ -49,25 +50,25 @@ function ItemCard({ item, onEdit, onDelete, language }: ItemCardProps) {
           </div>
         ) : null}
       </div>
-      <div className={styles.itemMeta}>
-        <div>€{item.price.toFixed(2)}</div>
-        <div className={styles.itemActions}>
-          <button
-            onClick={onEdit}
-            className={`${styles.btn} ${styles.btnSubtleDark} ${styles.btnIcon}`}
-            aria-label="Edit item"
-          >
-            <FontAwesomeIcon icon={faPen} />
-          </button>
-          <button
-            onClick={onDelete}
-            className={`${styles.btn} ${styles.btnDanger} ${styles.btnIcon}`}
-            aria-label="Delete item"
-          >
-            <FontAwesomeIcon icon={faTrash} />
-          </button>
-        </div>
-      </div>
+          <div className={styles.itemMeta}>
+            <div>€{item.price.toFixed(2)}</div>
+            <div className={styles.itemActions}>
+              <button
+                onClick={onEdit}
+                className={`${styles.btn} ${styles.btnSubtleDark} ${styles.btnIcon}`}
+                aria-label="Edit item"
+              >
+                <FontAwesomeIcon icon={faPen} />
+              </button>
+              <button
+                onClick={onDelete}
+                className={`${styles.btn} ${styles.btnDanger} ${styles.btnIcon}`}
+                aria-label={t("owner.item.delete")}
+              >
+                <FontAwesomeIcon icon={faTrash} />
+              </button>
+            </div>
+          </div>
     </div>
   );
 }
@@ -82,6 +83,7 @@ type CategoryCardProps = {
   onEditItem: (itemId: string) => void;
   onDeleteItem: (itemId: string) => void;
   language: Language;
+  t: (key: string) => string;
 };
 
 export function CategoryCard({
@@ -94,6 +96,7 @@ export function CategoryCard({
   onEditItem,
   onDeleteItem,
   language,
+  t,
 }: CategoryCardProps) {
   const displayTitle = resolveText(category.title, language);
 
@@ -121,19 +124,19 @@ export function CategoryCard({
               onClick={onAddItem}
               className={`${styles.btn} ${styles.btnSuccess} ${styles.btnSmall}`}
             >
-              + Add item
+              {t("owner.category.addItem")}
             </button>
             <button
               onClick={onRename}
               className={`${styles.btn} ${styles.btnSubtleDark} ${styles.btnSmall}`}
             >
-              Rename
+              {t("owner.category.rename")}
             </button>
             <button
               onClick={onDelete}
               className={`${styles.btn} ${styles.btnDanger} ${styles.btnSmall}`}
             >
-              Delete
+              {t("owner.category.delete")}
             </button>
           </div>
         )}
@@ -149,7 +152,7 @@ export function CategoryCard({
           <div className={styles.itemsSection}>
             {category.items.length === 0 && (
               <div className={styles.itemsEmpty}>
-                No items yet. Click “+ Add item”.
+                {t("owner.category.empty")}
               </div>
             )}
 
@@ -160,6 +163,7 @@ export function CategoryCard({
                 onEdit={() => onEditItem(it.id)}
                 onDelete={() => onDeleteItem(it.id)}
                 language={language}
+                t={t}
               />
             ))}
           </div>

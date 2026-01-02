@@ -10,6 +10,7 @@ import QRCode from "qrcode";
 import { getSession } from "@/lib/session";
 import Layout from "@/layout/layout";
 import { useToast } from "@/lib/toast";
+import { useI18n } from "@/lib/i18n";
 import { CategoryCard } from "@/components/menu/CategoryCard";
 import { Modal } from "@/components/menu/Modal";
 import styles from "@/styles/menu/menu.module.scss";
@@ -126,6 +127,7 @@ export default function OwnerMenuPage({
   const [hasChanges, setHasChanges] = useState(false);
   const [qrModalOpen, setQrModalOpen] = useState(false);
   const toast = useToast();
+  const { t } = useI18n();
 
   const [expandedCategoryId, setExpandedCategoryId] = useState<string | null>(
     null
@@ -609,11 +611,11 @@ export default function OwnerMenuPage({
   }
 
   return (
-    <Layout isLoggedIn showLogin={false}>
+    <Layout isLoggedIn showLogin={false} venueName={venueName}>
       <div className={styles.wrapper}>
         <div className={styles.pageHeader}>
           <div>
-            <h1 className={styles.pageTitle}>Edit Menu</h1>
+            <h1 className={styles.pageTitle}>{t("owner.page.title")}</h1>
           </div>
           {qrDataUrl && (
             <button
@@ -635,7 +637,7 @@ export default function OwnerMenuPage({
         <div className={styles.topRow}>
           <div className={styles.venueRow}>
             <label className={styles.venueLabel} htmlFor="venueName">
-              Venue name
+              {t("owner.venue.label")}
             </label>
             <input
               id="venueName"
@@ -687,7 +689,7 @@ export default function OwnerMenuPage({
                 onClick={addCategory}
                 className={`${styles.btn} ${styles.btnAccent} ${styles.btnSmall} ${styles.btnWide}`}
               >
-                + New category
+                {t("owner.newCategory")}
               </button>
               <button
                 onClick={save}
@@ -699,15 +701,13 @@ export default function OwnerMenuPage({
                   aria-hidden
                   className={styles.btnIconInline}
                 />{" "}
-                Save
+                {t("owner.save")}
               </button>
             </div>
           </div>
 
           {menu.categories.length === 0 && (
-            <div className={styles.emptyBox}>
-              No categories yet. Click “+ Add”.
-            </div>
+            <div className={styles.emptyBox}>{t("owner.noCategories")}</div>
           )}
 
           {menu.categories.map((c) => {
@@ -731,6 +731,7 @@ export default function OwnerMenuPage({
                   });
                 }}
                 language={language}
+                t={t}
               />
             );
           })}
@@ -740,7 +741,7 @@ export default function OwnerMenuPage({
       <Modal
         isOpen={newCategoryOpen}
         isVisible={newCategoryVisible}
-        title="Add category"
+        title={t("owner.modal.category.addTitle")}
       >
         <form onSubmit={submitNewCategory} className={styles.modalForm}>
           <div className={styles.translationGrid}>
@@ -768,13 +769,13 @@ export default function OwnerMenuPage({
               onClick={closeNewCategory}
               className={`${styles.btn} ${styles.btnSubtle} ${styles.btnSmall}`}
             >
-              Cancel
+              {t("owner.modal.cancel")}
             </button>
             <button
               type="submit"
               className={`${styles.btn} ${styles.btnSuccess} ${styles.btnSmall}`}
             >
-              Add
+              {t("owner.modal.add")}
             </button>
           </div>
         </form>
@@ -783,7 +784,7 @@ export default function OwnerMenuPage({
       <Modal
         isOpen={Boolean(renameTarget)}
         isVisible={renameVisible}
-        title="Rename category"
+        title={t("owner.modal.category.renameTitle")}
       >
         <form onSubmit={submitRename} className={styles.modalForm}>
           <div
@@ -813,13 +814,13 @@ export default function OwnerMenuPage({
               onClick={closeRename}
               className={`${styles.btn} ${styles.btnSubtle} ${styles.btnSmall}`}
             >
-              Cancel
+              {t("owner.modal.cancel")}
             </button>
             <button
               type="submit"
               className={`${styles.btn} ${styles.btnPrimary} ${styles.btnSmall}`}
             >
-              Update
+              {t("owner.modal.update")}
             </button>
           </div>
         </form>
@@ -828,7 +829,7 @@ export default function OwnerMenuPage({
       <Modal
         isOpen={Boolean(editTarget)}
         isVisible={editVisible}
-        title="Edit item"
+        title={t("owner.modal.item.editTitle")}
       >
         <form onSubmit={submitEdit} className={styles.modalForm}>
           <div className={styles.translationTabs}>
@@ -846,7 +847,9 @@ export default function OwnerMenuPage({
             ))}
           </div>
           <label className={styles.modalLabel}>
-            <span>Name ({editLanguageTab.toUpperCase()})</span>
+            <span>
+              {t("owner.modal.name")} ({editLanguageTab.toUpperCase()})
+            </span>
             <input
               value={editValues.names[editLanguageTab] ?? ""}
               onChange={(e) =>
@@ -861,7 +864,7 @@ export default function OwnerMenuPage({
             />
           </label>
           <label className={styles.modalLabel}>
-            <span>Price</span>
+            <span>{t("owner.modal.price")}</span>
             <input
               value={editValues.price}
               onChange={(e) =>
@@ -875,7 +878,9 @@ export default function OwnerMenuPage({
             />
           </label>
           <label className={styles.modalLabel}>
-            <span>Description ({editLanguageTab.toUpperCase()})</span>
+            <span>
+              {t("owner.modal.description")} ({editLanguageTab.toUpperCase()})
+            </span>
             <textarea
               value={editValues.descriptions[editLanguageTab] ?? ""}
               onChange={(e) =>
@@ -893,7 +898,7 @@ export default function OwnerMenuPage({
           </label>
           <label className={styles.modalLabel}>
             <span>
-              Ingredients ({editLanguageTab.toUpperCase()}) (comma separated)
+              {t("owner.modal.ingredients")} ({editLanguageTab.toUpperCase()})
             </span>
             <textarea
               value={editValues.ingredients[editLanguageTab] ?? ""}
@@ -917,13 +922,13 @@ export default function OwnerMenuPage({
               onClick={closeEdit}
               className={`${styles.btn} ${styles.btnSubtle} ${styles.btnSmall}`}
             >
-              Cancel
+              {t("owner.modal.cancel")}
             </button>
             <button
               type="submit"
               className={`${styles.btn} ${styles.btnPrimary} ${styles.btnSmall}`}
             >
-              Update
+              {t("owner.modal.update")}
             </button>
           </div>
         </form>
@@ -932,7 +937,7 @@ export default function OwnerMenuPage({
       <Modal
         isOpen={Boolean(addTarget)}
         isVisible={addVisible}
-        title="Add item"
+        title={t("owner.modal.item.addTitle")}
       >
         <form onSubmit={submitAdd} className={styles.modalForm}>
           <div className={styles.translationTabs}>
@@ -950,7 +955,9 @@ export default function OwnerMenuPage({
             ))}
           </div>
           <label className={styles.modalLabel}>
-            <span>Name ({addLanguageTab.toUpperCase()})</span>
+            <span>
+              {t("owner.modal.name")} ({addLanguageTab.toUpperCase()})
+            </span>
             <input
               value={addValues.names[addLanguageTab] ?? ""}
               onChange={(e) =>
@@ -965,7 +972,7 @@ export default function OwnerMenuPage({
             />
           </label>
           <label className={styles.modalLabel}>
-            <span>Price</span>
+            <span>{t("owner.modal.price")}</span>
             <input
               value={addValues.price}
               onChange={(e) =>
@@ -979,7 +986,9 @@ export default function OwnerMenuPage({
             />
           </label>
           <label className={styles.modalLabel}>
-            <span>Description ({addLanguageTab.toUpperCase()})</span>
+            <span>
+              {t("owner.modal.description")} ({addLanguageTab.toUpperCase()})
+            </span>
             <textarea
               value={addValues.descriptions[addLanguageTab] ?? ""}
               onChange={(e) =>
@@ -997,7 +1006,7 @@ export default function OwnerMenuPage({
           </label>
           <label className={styles.modalLabel}>
             <span>
-              Ingredients ({addLanguageTab.toUpperCase()}) (comma separated)
+              {t("owner.modal.ingredients")} ({addLanguageTab.toUpperCase()})
             </span>
             <textarea
               value={addValues.ingredients[addLanguageTab] ?? ""}
@@ -1021,13 +1030,13 @@ export default function OwnerMenuPage({
               onClick={closeAdd}
               className={`${styles.btn} ${styles.btnSubtle} ${styles.btnSmall}`}
             >
-              Cancel
+              {t("owner.modal.cancel")}
             </button>
             <button
               type="submit"
               className={`${styles.btn} ${styles.btnSuccess} ${styles.btnSmall}`}
             >
-              Add
+              {t("owner.modal.add")}
             </button>
           </div>
         </form>
@@ -1036,12 +1045,13 @@ export default function OwnerMenuPage({
       <Modal
         isOpen={Boolean(deleteTarget)}
         isVisible={deleteVisible}
-        title="Delete item"
+        title={t("owner.item.delete")}
       >
         <form onSubmit={submitDelete} className={styles.modalForm}>
           <p>
-            Are you sure you want to delete{" "}
-            <strong>{deleteTarget?.name}</strong>?
+            {t("owner.item.delete.confirm", {
+              name: deleteTarget?.name ?? "",
+            })}
           </p>
           <div className={styles.modalActions}>
             <button
@@ -1049,13 +1059,13 @@ export default function OwnerMenuPage({
               onClick={closeDelete}
               className={`${styles.btn} ${styles.btnSubtle} ${styles.btnSmall}`}
             >
-              Cancel
+              {t("owner.modal.cancel")}
             </button>
             <button
               type="submit"
               className={`${styles.btn} ${styles.btnDanger} ${styles.btnSmall}`}
             >
-              Delete
+              {t("owner.modal.delete")}
             </button>
           </div>
         </form>
@@ -1064,15 +1074,16 @@ export default function OwnerMenuPage({
       <Modal
         isOpen={Boolean(deleteCategoryTarget)}
         isVisible={deleteCategoryVisible}
-        title="Delete category"
+        title={t("owner.category.delete.confirmTitle")}
       >
         <form onSubmit={submitDeleteCategory} className={styles.modalForm}>
           <p>
-            Are you sure you want to delete{" "}
-            <strong>{deleteCategoryTarget?.title}</strong> and its items?
+            {t("owner.category.delete.prompt", {
+              title: deleteCategoryTarget?.title ?? "",
+            })}
           </p>
           <label className={styles.modalLabel}>
-            <span>Type DELETE to confirm</span>
+            <span>{t("owner.category.delete.confirmInput")}</span>
             <input
               value={deleteCategoryConfirm}
               onChange={(e) => setDeleteCategoryConfirm(e.target.value)}
@@ -1086,14 +1097,14 @@ export default function OwnerMenuPage({
               onClick={closeDeleteCategory}
               className={`${styles.btn} ${styles.btnSubtle} ${styles.btnSmall}`}
             >
-              Cancel
+              {t("owner.modal.cancel")}
             </button>
             <button
               type="submit"
               className={`${styles.btn} ${styles.btnDanger} ${styles.btnSmall}`}
               disabled={deleteCategoryConfirm.trim().toLowerCase() !== "delete"}
             >
-              Delete
+              {t("owner.modal.delete")}
             </button>
           </div>
         </form>
@@ -1104,7 +1115,7 @@ export default function OwnerMenuPage({
           {qrDataUrl && (
             <Image
               src={qrDataUrl}
-              alt="Menu QR code large"
+              alt={t("owner.qr.altLarge")}
               className={styles.qrImageLarge}
               width={240}
               height={240}
@@ -1122,7 +1133,7 @@ export default function OwnerMenuPage({
             onClick={() => setQrModalOpen(false)}
             className={`${styles.btn} ${styles.btnPrimary} ${styles.btnSmall}`}
           >
-            Close
+            {t("owner.modal.cancel")}
           </button>
         </div>
       </Modal>
