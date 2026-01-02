@@ -9,6 +9,7 @@ import waiterImg from "@/assets/landingPage/waiter-service.jpg";
 import corridorHeroImg from "@/assets/landingPage/corridor-cozy.jpg";
 import ambienceImg from "@/assets/landingPage/green-restaurant.jpg";
 import friendsImg from "@/assets/landingPage/friends-dining.jpg";
+import Head from "next/head";
 
 type HomeProps = {
   isLoggedIn: boolean;
@@ -19,6 +20,22 @@ export default function Home({ isLoggedIn }: HomeProps) {
 
   return (
     <Layout isLoggedIn={isLoggedIn}>
+      <Head>
+        <title>Leziz | Multilingual QR Menus for Restaurants</title>
+        <meta
+          name="description"
+          content="Create, translate, and share your restaurant menu in minutes. Keep prices fresh, share one QR code, and serve guests in their language."
+        />
+        <meta
+          property="og:title"
+          content="Leziz | Multilingual QR Menus for Restaurants"
+        />
+        <meta
+          property="og:description"
+          content="Build and update digital menus with translations, QR sharing, and instant pricing changes."
+        />
+        <meta property="og:type" content="website" />
+      </Head>
       <div className={styles.page}>
         <section className={styles.hero}>
           <div className={styles.heroContent}>
