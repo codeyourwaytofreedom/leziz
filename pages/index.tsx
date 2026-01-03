@@ -17,14 +17,19 @@ import { ObjectId } from "mongodb";
 type HomeProps = {
   isLoggedIn: boolean;
   venueName: string | null;
+  role: string | null;
 };
 
-export default function Home({ isLoggedIn, venueName }: HomeProps) {
+export default function Home({ isLoggedIn, venueName, role }: HomeProps) {
   const { t } = useI18n();
   const primaryCta = isLoggedIn ? "/owner/menu" : "/login";
 
   return (
-    <Layout isLoggedIn={isLoggedIn} venueName={venueName ?? undefined}>
+    <Layout
+      isLoggedIn={isLoggedIn}
+      venueName={venueName ?? undefined}
+      role={role ?? undefined}
+    >
       <Head>
         <title>Leziz | Multilingual QR Menus for Restaurants</title>
         <meta
@@ -165,6 +170,7 @@ export const getServerSideProps: GetServerSideProps<HomeProps> = async (
 ) => {
   const session = getSession(ctx.req);
   let venueName: string | undefined;
+  const role = session?.role ?? null;
 
   if (session?.venueId) {
     const db = await getDb();
@@ -180,6 +186,7 @@ export const getServerSideProps: GetServerSideProps<HomeProps> = async (
     props: {
       isLoggedIn: Boolean(session),
       venueName: venueName ?? null,
+      role,
     },
   };
 };

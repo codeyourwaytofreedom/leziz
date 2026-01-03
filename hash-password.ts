@@ -1,7 +1,7 @@
 import bcrypt from "bcryptjs";
 
 async function run() {
-  const password = "frenchpassword";
+  const password = "laboss";
   const hash = await bcrypt.hash(password, 10);
   console.log(hash);
 }

@@ -19,6 +19,7 @@ type LayoutProps = {
   showLogin?: boolean;
   isLoggedIn?: boolean;
   venueName?: string;
+  role?: string | null;
 };
 
 export default function Layout({
@@ -26,6 +27,7 @@ export default function Layout({
   showLogin = true,
   isLoggedIn = false,
   venueName,
+  role,
 }: LayoutProps) {
   const router = useRouter();
   const [loggingOut, setLoggingOut] = useState(false);
@@ -34,6 +36,21 @@ export default function Layout({
   const [profileOpen, setProfileOpen] = useState(false);
   const langRef = useRef<HTMLDivElement | null>(null);
   const profileRef = useRef<HTMLDivElement | null>(null);
+
+  type NavRole = "guest" | "owner" | "bigboss";
+  type NavAction = "login" | "profileDropdown" | "logoutButton";
+
+  const navRole: NavRole =
+    role === "bigboss" ? "bigboss" : isLoggedIn ? "owner" : "guest";
+
+  const navActions: NavAction[] =
+    navRole === "bigboss"
+      ? ["logoutButton"]
+      : navRole === "owner"
+      ? ["profileDropdown"]
+      : showLogin
+      ? ["login"]
+      : [];
 
   const isActive = (href: string) =>
     router.pathname === href ||
@@ -86,62 +103,88 @@ export default function Layout({
             />
           </Link>
           <div className={styles.links}>
-            {shouldShowLogin && (
-              <Link
-                prefetch
-                href="/login"
-                className={isActive("/login") ? styles.active : undefined}
-              >
-                <FontAwesomeIcon
-                  icon={faRightToBracket}
-                  className={styles.btnIconInline}
-                />{" "}
-                {t("nav.login")}
-              </Link>
-            )}
             <div className={styles.dropdownStack}>
-              {isLoggedIn && (
-                <div className={styles.langSwitch} ref={profileRef}>
-                  <button
-                    type="button"
-                    className={styles.langDropdownToggle}
-                    aria-label="Profile"
-                    onClick={() => setProfileOpen((o) => !o)}
-                    aria-haspopup="true"
-                    aria-expanded={profileOpen}
-                  >
-                    <span className={styles.langLabel}>
-                      {venueName ? venueName : "Profile"}
-                    </span>
-                    <span className={styles.langCaret}>▾</span>
-                  </button>
-                  {profileOpen && (
-                    <div
-                      className={`${styles.langMenu} ${styles.profileMenu}`}
-                      role="menu"
+              {navActions.map((action) => {
+                if (action === "login") {
+                  return (
+                    <Link
+                      key="login"
+                      prefetch
+                      href="/login"
+                      className={isActive("/login") ? styles.active : undefined}
                     >
-                      <Link
-                        prefetch
-                        href="/owner/menu"
-                        className={styles.langMenuItem}
-                        onClick={() => setProfileOpen(false)}
+                      <FontAwesomeIcon
+                        icon={faRightToBracket}
+                        className={styles.btnIconInline}
+                      />{" "}
+                      {t("nav.login")}
+                    </Link>
+                  );
+                }
+
+                if (action === "logoutButton") {
+                  return (
+                    <button
+                      key="logout"
+                      type="button"
+                      className={styles.langDropdownToggle}
+                      onClick={handleLogout}
+                      disabled={loggingOut}
+                    >
+                      <FontAwesomeIcon icon={faRightFromBracket} />
+                      <span className={styles.langLabel}>{t("nav.logout")}</span>
+                    </button>
+                  );
+                }
+
+                // profileDropdown
+                return (
+                  <div
+                    key="profile"
+                    className={styles.langSwitch}
+                    ref={profileRef}
+                  >
+                    <button
+                      type="button"
+                      className={styles.langDropdownToggle}
+                      aria-label="Profile"
+                      onClick={() => setProfileOpen((o) => !o)}
+                      aria-haspopup="true"
+                      aria-expanded={profileOpen}
+                    >
+                      <span className={styles.langLabel}>
+                        {venueName ? venueName : "Profile"}
+                      </span>
+                      <span className={styles.langCaret}>▾</span>
+                    </button>
+                    {profileOpen && (
+                      <div
+                        className={`${styles.langMenu} ${styles.profileMenu}`}
+                        role="menu"
                       >
-                        <FontAwesomeIcon icon={faUtensils} />
-                        <span>{t("nav.menu")}</span>
-                      </Link>
-                      <button
-                        type="button"
-                        className={styles.langMenuItem}
-                        onClick={handleLogout}
-                        disabled={loggingOut}
-                      >
-                        <FontAwesomeIcon icon={faRightFromBracket} />
-                        <span>{t("nav.logout")}</span>
-                      </button>
-                    </div>
-                  )}
-                </div>
-              )}
+                        <Link
+                          prefetch
+                          href="/owner/menu"
+                          className={styles.langMenuItem}
+                          onClick={() => setProfileOpen(false)}
+                        >
+                          <FontAwesomeIcon icon={faUtensils} />
+                          <span>{t("nav.menu")}</span>
+                        </Link>
+                        <button
+                          type="button"
+                          className={styles.langMenuItem}
+                          onClick={handleLogout}
+                          disabled={loggingOut}
+                        >
+                          <FontAwesomeIcon icon={faRightFromBracket} />
+                          <span>{t("nav.logout")}</span>
+                        </button>
+                      </div>
+                    )}
+                  </div>
+                );
+              })}
               <div className={styles.langSwitch} ref={langRef}>
                 <button
                   type="button"

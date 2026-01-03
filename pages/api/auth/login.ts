@@ -20,21 +20,25 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   if (!ok) return res.status(401).json({ error: "Invalid credentials" });
 
   const sessionValue = JSON.stringify({
-  userId: String(user._id),
-  role: user.role,
-  venueId: user.venueId,
-});
+    userId: String(user._id),
+    role: user.role,
+    venueId: user.venueId,
+  });
 
-res.setHeader(
-  "Set-Cookie",
-  serialize("session", sessionValue, {
-    httpOnly: true,
-    secure: process.env.NODE_ENV === "production",
-    sameSite: "lax",
-    path: "/",
-    maxAge: 60 * 60 * 24,
-  })
-);
+  res.setHeader(
+    "Set-Cookie",
+    serialize("session", sessionValue, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "lax",
+      path: "/",
+      maxAge: 60 * 60 * 24,
+    })
+  );
 
-return res.status(200).json({ ok: true });
+  return res.status(200).json({
+    ok: true,
+    role: user.role ?? null,
+    venueId: user.venueId ?? null,
+  });
 }

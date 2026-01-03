@@ -24,7 +24,7 @@ export default function OwnerQrPage({ url, qrDataUrl, venueName }: Props) {
   const displayName = resolveText(venueName);
 
   return (
-    <Layout isLoggedIn showLogin={false}>
+    <Layout isLoggedIn showLogin={false} role="owner">
       <main style={{ padding: 24 }}>
         <h1>QR – {displayName}</h1>
         <p>{url}</p>
@@ -46,6 +46,11 @@ export const getServerSideProps: GetServerSideProps<Props> = async (ctx) => {
   if (!session) {
     return {
       redirect: { destination: "/login", permanent: false },
+    };
+  }
+  if (session.role === "bigboss") {
+    return {
+      redirect: { destination: "/bigboss", permanent: false },
     };
   }
 

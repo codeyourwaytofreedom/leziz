@@ -611,7 +611,12 @@ export default function OwnerMenuPage({
   }
 
   return (
-    <Layout isLoggedIn showLogin={false} venueName={venueName}>
+    <Layout
+      isLoggedIn
+      showLogin={false}
+      venueName={venueName}
+      role="owner"
+    >
       <div className={styles.wrapper}>
         <div className={styles.pageHeader}>
           <div>
@@ -1147,6 +1152,14 @@ export const getServerSideProps: GetServerSideProps<Props> = async (ctx) => {
     return {
       redirect: {
         destination: "/login",
+        permanent: false,
+      },
+    };
+  }
+  if (session.role === "bigboss") {
+    return {
+      redirect: {
+        destination: "/bigboss",
         permanent: false,
       },
     };

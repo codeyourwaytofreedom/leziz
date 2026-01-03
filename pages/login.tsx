@@ -9,10 +9,12 @@ import { getSession } from "@/lib/session";
 export default function LoginPage() {
   const router = useRouter();
   const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
 
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     setError("");
+    setLoading(true);
 
     const form = event.currentTarget;
     const email = (form.elements.namedItem("username") as HTMLInputElement)
@@ -28,11 +30,24 @@ export default function LoginPage() {
 
     if (!res.ok) {
       setError("Invalid credentials");
+      setLoading(false);
       return;
     }
 
     // cookie is now set by the server
-    router.push("/owner/menu");
+    try {
+      const data = (await res.json()) as {
+        ok?: boolean;
+        role?: string | null;
+        venueId?: string | null;
+      };
+      const next = data.role === "bigboss" ? "/bigboss" : "/owner/menu";
+      router.push(next);
+    } catch {
+      router.push("/owner/menu");
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -68,7 +83,7 @@ export default function LoginPage() {
           {error && <p style={{ color: "red" }}>{error}</p>}
 
           <button type="submit" className={styles.button}>
-            Continue
+            {loading ? "Working..." : "Continue"}
           </button>
         </form>
       </div>
