@@ -58,7 +58,10 @@ export const getServerSideProps: GetServerSideProps<Props> = async (ctx) => {
 
   // token for this owner’s venue
   const tokenDoc = await db.collection("public_tokens").findOne({
-    venueId: session.venueId,
+    $or: [
+      { venueId: new ObjectId(session.venueId) },
+      { venueId: session.venueId },
+    ],
     active: true,
   });
 

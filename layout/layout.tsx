@@ -5,6 +5,7 @@ import { ReactNode, useEffect, useRef, useState } from "react";
 
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
+  faCrown,
   faRightFromBracket,
   faRightToBracket,
   faUtensils,
@@ -45,7 +46,7 @@ export default function Layout({
 
   const navActions: NavAction[] =
     navRole === "bigboss"
-      ? ["logoutButton"]
+      ? ["profileDropdown"]
       : navRole === "owner"
       ? ["profileDropdown"]
       : showLogin
@@ -138,6 +139,12 @@ export default function Layout({
                 }
 
                 // profileDropdown
+                const profileLabel =
+                  navRole === "bigboss"
+                    ? "Big Boss"
+                    : venueName
+                    ? venueName
+                    : "Profile";
                 return (
                   <div
                     key="profile"
@@ -153,7 +160,7 @@ export default function Layout({
                       aria-expanded={profileOpen}
                     >
                       <span className={styles.langLabel}>
-                        {venueName ? venueName : "Profile"}
+                        {profileLabel}
                       </span>
                       <span className={styles.langCaret}>▾</span>
                     </button>
@@ -162,15 +169,28 @@ export default function Layout({
                         className={`${styles.langMenu} ${styles.profileMenu}`}
                         role="menu"
                       >
-                        <Link
-                          prefetch
-                          href="/owner/menu"
-                          className={styles.langMenuItem}
-                          onClick={() => setProfileOpen(false)}
-                        >
-                          <FontAwesomeIcon icon={faUtensils} />
-                          <span>{t("nav.menu")}</span>
-                        </Link>
+                        {navRole !== "bigboss" && (
+                          <Link
+                            prefetch
+                            href="/owner/menu"
+                            className={styles.langMenuItem}
+                            onClick={() => setProfileOpen(false)}
+                          >
+                            <FontAwesomeIcon icon={faUtensils} />
+                            <span>{t("nav.menu")}</span>
+                          </Link>
+                        )}
+                        {navRole === "bigboss" && (
+                          <Link
+                            prefetch
+                            href="/bigboss"
+                            className={styles.langMenuItem}
+                            onClick={() => setProfileOpen(false)}
+                          >
+                            <FontAwesomeIcon icon={faCrown} />
+                            <span>Bigboss</span>
+                          </Link>
+                        )}
                         <button
                           type="button"
                           className={styles.langMenuItem}

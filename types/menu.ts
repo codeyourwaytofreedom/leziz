@@ -16,4 +16,9 @@ export type Category = {
 
 export type Menu = {
   categories: Category[];
+  menuConfig?: {
+    withImages?: boolean;
+    menuBackgroundColor?: string;
+  };
+  venueName?: LocalizedText;
 };

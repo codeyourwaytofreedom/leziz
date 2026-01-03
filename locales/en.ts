@@ -71,8 +71,28 @@ export const en: TranslationDict = {
   "owner.modal.category.renameTitle": "Rename category",
   "owner.modal.item.addTitle": "Add item",
   "owner.modal.item.editTitle": "Edit item",
+  "owner.empty.start": "Start your menu",
+  "owner.empty.cta": "Add your first category",
 
   // QR
   "owner.qr.alt": "Menu QR code",
   "owner.qr.altLarge": "Menu QR code large",
+
+  // Bigboss
+  "bigboss.subtitle":
+    "Add a new venue by entering its name and languages. Menus start empty for owners to fill in.",
+  "bigboss.venueName": "Venue name",
+  "bigboss.defaultLang": "Default language",
+  "bigboss.languagesLabel": "Languages (comma separated)",
+  "bigboss.ownerEmail": "Owner email",
+  "bigboss.ownerPassword": "Owner password",
+  "bigboss.ownerPasswordHint": "At least 6 characters",
+  "bigboss.createVenue": "Create venue",
+  "bigboss.creating": "Creating...",
+  "bigboss.toast.ownerRequired": "Owner email and password are required",
+  "bigboss.toast.passwordShort": "Password must be at least 6 characters",
+  "bigboss.toast.venueError": "Error creating venue",
+  "bigboss.toast.venueSuccess": "Venue created",
+  "bigboss.toast.userError": "Venue saved, user creation failed",
+  "bigboss.toast.userSuccess": "Owner user created",
 };

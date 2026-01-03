@@ -2,7 +2,7 @@ import { GetServerSideProps } from "next";
 import Image from "next/image";
 import { useEffect, useState } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faFloppyDisk } from "@fortawesome/free-solid-svg-icons";
+import { faFloppyDisk, faPlusCircle } from "@fortawesome/free-solid-svg-icons";
 import { ObjectId } from "mongodb";
 import { getDb } from "@/lib/mongodb";
 import QRCode from "qrcode";
@@ -17,14 +17,27 @@ import styles from "@/styles/menu/menu.module.scss";
 import { Category, Menu, MenuItem, LocalizedText } from "@/types/menu";
 
 type Language = string;
+const styleOptions = [
+  { name: "midnight", value: "#0f172a" },
+  { name: "slate", value: "#1f2937" },
+  { name: "charcoal", value: "#111827" },
+  { name: "deep teal", value: "#155263" },
+  { name: "forest", value: "#0f3d2e" },
+  { name: "ocean", value: "#367591" },
+  { name: "plum", value: "#4b1640" },
+  { name: "linen", value: "#f5f0e6" },
+  { name: "sand", value: "#f4e7d3" },
+  { name: "cloud", value: "#e5ecf5" },
+];
 
 type Props = {
   venueId: string; // ObjectId as string
-  venueName: LocalizedText;
+  venueName: string;
   menu: Menu;
   languages: Language[];
   qrUrl?: string;
   qrDataUrl?: string;
+  menuConfig?: { withImages?: boolean; menuBackgroundColor?: string };
 };
 
 function uid(prefix = "id") {
@@ -109,25 +122,26 @@ function buildIngredientsFromAllLanguages(
 
 export default function OwnerMenuPage({
   venueId,
-  venueName: initialVenueName,
+  venueName,
   menu: initialMenu,
   languages: providedLanguages,
   qrUrl,
   qrDataUrl,
+  menuConfig: initialMenuConfig,
 }: Props) {
   const languages =
     providedLanguages && providedLanguages.length > 0
       ? providedLanguages
       : (["en", "tr", "de"] as Language[]);
   const [language, setLanguage] = useState<Language>(languages[0] ?? "en");
-  const [venueName, setVenueName] = useState(() =>
-    resolveText(initialVenueName, languages[0] ?? "en")
-  );
   const [menu, setMenu] = useState<Menu>(initialMenu);
   const [hasChanges, setHasChanges] = useState(false);
   const [qrModalOpen, setQrModalOpen] = useState(false);
   const toast = useToast();
   const { t } = useI18n();
+  const [publicStyle, setPublicStyle] = useState(
+    initialMenuConfig?.menuBackgroundColor ?? styleOptions[0].value
+  );
 
   const [expandedCategoryId, setExpandedCategoryId] = useState<string | null>(
     null
@@ -600,7 +614,14 @@ export default function OwnerMenuPage({
       const res = await fetch("/api/owner/menu", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ venueId, venueName, menu }),
+        body: JSON.stringify({
+          venueId,
+          menu,
+          menuConfig: {
+            ...(initialMenuConfig || {}),
+            menuBackgroundColor: publicStyle,
+          },
+        }),
       });
       if (!res.ok) throw new Error(await res.text());
       toast.addToast("Saved", "success");
@@ -611,12 +632,7 @@ export default function OwnerMenuPage({
   }
 
   return (
-    <Layout
-      isLoggedIn
-      showLogin={false}
-      venueName={venueName}
-      role="owner"
-    >
+    <Layout isLoggedIn showLogin={false} role="owner" venueName={venueName}>
       <div className={styles.wrapper}>
         <div className={styles.pageHeader}>
           <div>
@@ -639,63 +655,62 @@ export default function OwnerMenuPage({
           )}
         </div>
 
-        <div className={styles.topRow}>
-          <div className={styles.venueRow}>
-            <label className={styles.venueLabel} htmlFor="venueName">
-              {t("owner.venue.label")}
-            </label>
-            <input
-              id="venueName"
-              value={venueName}
-              onChange={(e) => {
-                setVenueName(e.target.value);
-                setHasChanges(true);
-              }}
-              className={styles.venueInput}
-            />
+        <div className={styles.topRow}></div>
+
+        <div className={styles.styleBar}>
+          <span className={styles.styleLabel}>Public menu background</span>
+          <div className={styles.styleSwatches}>
+            {styleOptions.map((opt) => (
+              <button
+                key={opt.name}
+                type="button"
+                className={`${styles.swatch} ${
+                  publicStyle === opt.value ? styles.swatchSelected : ""
+                }`}
+                style={{ backgroundColor: opt.value }}
+                onClick={() => {
+                  setPublicStyle(opt.value);
+                  setHasChanges(true);
+                }}
+                aria-label={`Choose ${opt.name} background`}
+              />
+            ))}
           </div>
-          <div className={styles.languageRow}>
-            <div className={styles.languageSwitcher}>
-              {languages.map((lang) => (
-                <button
-                  key={lang}
-                  type="button"
-                  onClick={() => setLanguage(lang)}
-                  className={`${styles.btn} ${styles.languageButton} ${
-                    language === lang ? styles.languageButtonActive : ""
-                  }`}
-                >
-                  {lang.toUpperCase()}
-                </button>
-              ))}
-            </div>
-          </div>
+          <span className={styles.styleHint}>
+            {(
+              styleOptions.find((o) => o.value === publicStyle)?.name || ""
+            ).replace(/^\w/, (c) => c.toUpperCase())}
+          </span>
         </div>
 
-        <div className={styles.venueRowMobile}>
-          <label className={styles.venueLabel} htmlFor="venueName">
-            Venue name
-          </label>
-          <input
-            id="venueName"
-            value={venueName}
-            onChange={(e) => {
-              setVenueName(e.target.value);
-              setHasChanges(true);
-            }}
-            className={styles.venueInput}
-          />
+        <div className={styles.languageRow}>
+          <div className={styles.languageSwitcher}>
+            {languages.map((lang) => (
+              <button
+                key={lang}
+                type="button"
+                onClick={() => setLanguage(lang)}
+                className={`${styles.btn} ${styles.languageButton} ${
+                  language === lang ? styles.languageButtonActive : ""
+                }`}
+              >
+                {lang.toUpperCase()}
+              </button>
+            ))}
+          </div>
         </div>
 
         <section className={styles.section}>
           <div className={styles.headerRow}>
             <div className={styles.headerActions}>
-              <button
-                onClick={addCategory}
-                className={`${styles.btn} ${styles.btnAccent} ${styles.btnSmall} ${styles.btnWide}`}
-              >
-                {t("owner.newCategory")}
-              </button>
+              {menu.categories.length > 0 && (
+                <button
+                  onClick={addCategory}
+                  className={`${styles.btn} ${styles.btnAccent} ${styles.btnSmall} ${styles.btnWide}`}
+                >
+                  {t("owner.newCategory")}
+                </button>
+              )}
               <button
                 onClick={save}
                 className={`${styles.btn} ${styles.btnSuccess} ${styles.btnSmall}`}
@@ -712,7 +727,22 @@ export default function OwnerMenuPage({
           </div>
 
           {menu.categories.length === 0 && (
-            <div className={styles.emptyBox}>{t("owner.noCategories")}</div>
+            <div className={styles.emptyState}>
+              <button
+                type="button"
+                className={styles.emptyIcon}
+                onClick={addCategory}
+                aria-label="Add your first category"
+              >
+                <FontAwesomeIcon icon={faPlusCircle} />
+              </button>
+              <div className={styles.emptyCopy}>
+                <h3>{t("owner.empty.start")}</h3>
+              </div>
+              <span className={styles.emptyActionLabel}>
+                {t("owner.empty.cta")}
+              </span>
+            </div>
           )}
 
           {menu.categories.map((c) => {
@@ -1168,7 +1198,10 @@ export const getServerSideProps: GetServerSideProps<Props> = async (ctx) => {
   const db = await getDb();
 
   const tokenDoc = await db.collection("public_tokens").findOne({
-    venueId: session.venueId,
+    $or: [
+      { venueId: new ObjectId(session.venueId) },
+      { venueId: session.venueId },
+    ],
     active: true,
   });
 
@@ -1177,7 +1210,12 @@ export const getServerSideProps: GetServerSideProps<Props> = async (ctx) => {
     .findOne({ _id: new ObjectId(venueId) });
   if (!venue) return { notFound: true };
 
-  const menu: Menu = venue.menu ?? { categories: [] };
+  const venueName = venue.name;
+
+  const menu: Menu =
+    venue.menu && Object.keys(venue.menu).length > 0
+      ? { ...venue.menu, menuConfig: venue.menuConfig }
+      : { categories: [], menuConfig: venue.menuConfig };
   const languages = Array.isArray(venue.langs)
     ? venue.langs
     : ["en", "tr", "de"];
@@ -1195,9 +1233,10 @@ export const getServerSideProps: GetServerSideProps<Props> = async (ctx) => {
   return {
     props: {
       venueId,
-      venueName: venue.name ?? "Venue",
+      venueName,
       menu,
       languages,
+      menuConfig: venue.menuConfig ?? null,
       ...(qrUrl && qrDataUrl ? { qrUrl, qrDataUrl } : {}),
     },
   };

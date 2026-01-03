@@ -1,10 +1,17 @@
 .page {
   min-height: 100vh;
   color: var(--color-text);
-  background: linear-gradient(135deg, #0b1024, #161b33, #1f2647);
   padding-top: 100px;
   position: relative;
   isolation: isolate;
+}
+
+.pageDark {
+  color: #f8fafc;
+}
+
+.pageLight {
+  color: #0f172a;
 }
 
 .page::before {
@@ -18,7 +25,7 @@
 }
 
 .content {
-  max-width: 960px;
+  max-width: 780px;
   margin: 0 auto;
   padding: 0 1.25rem 2.5rem;
   display: grid;
@@ -39,10 +46,10 @@
   justify-content: center;
   align-items: center;
   gap: 0.5rem;
-  background: rgba(255, 255, 255, 0.12);
   padding: 0.8rem 0.85rem;
   border-radius: 0;
   width: 100%;
+  position: relative;
 }
 
 .sectionTitle {
@@ -51,6 +58,38 @@
   color: #f7c948;
   text-transform: uppercase;
   letter-spacing: 0.04em;
+  position: relative;
+  padding: 0 0.85rem;
+  z-index: 1;
+}
+
+.pageLight .sectionTitle {
+  color: #0f172a;
+}
+
+.sectionHeader::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 50%;
+  height: 1px;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(226, 232, 240, 0.35),
+    transparent
+  );
+  z-index: 0;
+}
+
+.pageLight .sectionHeader::before {
+  background: linear-gradient(
+    90deg,
+    transparent,
+    #b45309,
+    transparent
+  );
 }
 
 .items {
@@ -63,9 +102,14 @@
   grid-template-columns: 140px 1fr auto;
   gap: 0.65rem 1rem;
   padding: 1rem 0.65rem;
-  border-bottom: 1px dashed rgba(255, 255, 255, 0.15);
   min-height: 150px;
   align-items: stretch;
+}
+
+.itemNoImage {
+  grid-template-columns: 1fr auto;
+  padding-left: 0;
+  max-width: 640px;
 }
 
 .itemImageWrap {
@@ -74,16 +118,10 @@
   height: 140px;
   border-radius: 12px;
   overflow: hidden;
-  background: #0f172a;
-  border: 1px solid var(--color-border);
 }
 
 .itemImage {
   object-fit: cover;
-}
-
-.item:last-child {
-  border-bottom: none;
 }
 
 .itemName {
@@ -92,6 +130,10 @@
   margin-bottom: 4px;
   color: #f1f5f9;
   font-size: 1.08rem;
+}
+
+.pageLight .itemName {
+  color: #0f172a;
 }
 
 .itemBody {
@@ -104,6 +146,12 @@
 .itemPrice {
   font-weight: 700;
   color: #f7c948;
+  font-size: 1.15rem;
+  justify-self: center;
+}
+
+.pageLight .itemPrice {
+  color: #b45309;
 }
 
 .itemDescription {
@@ -111,6 +159,10 @@
   margin: 0;
   color: #cbd5e1;
   font-size: 0.95rem;
+}
+
+.pageLight .itemDescription {
+  color: #334155;
 }
 
 .itemIngredients {
@@ -126,7 +178,11 @@
   color: #e2e8f0;
   opacity: 0.9;
   font-weight: 600;
-  font-size: 0.92rem;
+  font-size: 0.85rem;
+}
+
+.pageLight .ingredientsLabel {
+  color: #0f172a;
 }
 
 .ingredientsList {
@@ -139,13 +195,19 @@
   padding: 4px 8px;
   border-radius: 999px;
   border: 1px dashed rgba(255, 255, 255, 0.35);
-  color: #e2e8f0;
+  color: #ffffff;
   font-size: 0.88rem;
-  background: rgba(255, 255, 255, 0.04);
+  background: rgba(148, 163, 184, 0.35);
+}
+
+.pageLight .ingredientPill {
+  border-color: rgba(0, 0, 0, 0.2);
+  color: #0f172a;
+  background: rgba(148, 163, 184, 0.2);
 }
 
 .topBar {
-  max-width: 960px;
+  max-width: 780px;
   margin: 0 auto;
   padding: 0 1.25rem 1rem;
   display: flex;
@@ -167,6 +229,12 @@
   box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
 }
 
+.pageLight .languageSwitcher {
+  background: rgba(0, 0, 0, 0.04);
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.12);
+}
+
 .languageButton {
   border: 1px solid rgba(255, 255, 255, 0.25);
   background: rgba(255, 255, 255, 0.08);
@@ -183,15 +251,70 @@
   transform: translateY(-1px);
 }
 
+.pageLight .languageButton {
+  border: 1px solid rgba(0, 0, 0, 0.12);
+  background: rgba(0, 0, 0, 0.04);
+  color: #0f172a;
+}
+
+.pageLight .languageButton:hover {
+  background: rgba(0, 0, 0, 0.08);
+}
+
 .languageButtonActive {
-  background: linear-gradient(135deg, #f7c948, #f59e0b);
+  background: rgba(255, 255, 255, 0.18);
   color: #0b1024;
   border-color: transparent;
-  box-shadow: 0 6px 18px rgba(247, 201, 72, 0.35);
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.25);
+}
+
+.pageLight .languageButtonActive {
+  background: rgba(0, 0, 0, 0.08);
+  color: #0f172a;
+  border-color: transparent;
+  box-shadow: 0 6px 14px rgba(0, 0, 0, 0.14);
 }
 
 @media (min-width: 768px) {
   .hero {
     height: 260px;
+  }
+}
+
+@media (max-width: 640px) {
+  .item {
+    grid-template-columns: 1fr;
+    grid-template-areas:
+      "image"
+      "text"
+      "price";
+    gap: 0.5rem;
+    justify-items: center;
+    text-align: center;
+    padding: 0.75rem 0.65rem;
+  }
+
+  .itemImageWrap {
+    width: 100%;
+    max-width: 260px;
+    height: 160px;
+    justify-self: center;
+  }
+
+  .itemBody {
+    grid-area: text;
+  }
+
+  .itemPrice {
+    grid-area: price;
+    justify-self: center;
+  }
+
+  .itemNoImage {
+    max-width: none;
+  }
+
+  .itemIngredients {
+    align-items: center;
   }
 }

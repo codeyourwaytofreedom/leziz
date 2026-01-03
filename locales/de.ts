@@ -70,7 +70,29 @@ export const de: TranslationDict = {
   "owner.modal.category.renameTitle": "Kategorie umbenennen",
   "owner.modal.item.addTitle": "Artikel hinzufügen",
   "owner.modal.item.editTitle": "Artikel bearbeiten",
+  "owner.empty.start": "Starten Sie Ihre Speisekarte",
+  "owner.empty.cta": "Fügen Sie Ihre erste Kategorie hinzu",
 
   "owner.qr.alt": "Speisekarten-QR-Code",
   "owner.qr.altLarge": "Großer Speisekarten-QR-Code",
+
+  // Bigboss
+  "bigboss.subtitle":
+    "Fügen Sie ein neues Restaurant hinzu, indem Sie Name und Sprachen eingeben. Menüs starten leer, damit Besitzer sie füllen.",
+  "bigboss.venueName": "Restaurantname",
+  "bigboss.defaultLang": "Standardsprache",
+  "bigboss.languagesLabel": "Sprachen (durch Komma getrennt)",
+  "bigboss.ownerEmail": "E-Mail des Besitzers",
+  "bigboss.ownerPassword": "Passwort des Besitzers",
+  "bigboss.ownerPasswordHint": "Mindestens 6 Zeichen",
+  "bigboss.createVenue": "Restaurant anlegen",
+  "bigboss.creating": "Wird erstellt...",
+  "bigboss.toast.ownerRequired":
+    "E-Mail und Passwort des Besitzers sind erforderlich",
+  "bigboss.toast.passwordShort":
+    "Das Passwort muss mindestens 6 Zeichen haben",
+  "bigboss.toast.venueError": "Fehler beim Anlegen des Restaurants",
+  "bigboss.toast.venueSuccess": "Restaurant angelegt",
+  "bigboss.toast.userError": "Restaurant gespeichert, Benutzer fehlgeschlagen",
+  "bigboss.toast.userSuccess": "Besitzer-Benutzer erstellt",
 };

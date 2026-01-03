@@ -25,10 +25,11 @@ type Menu = {
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method !== "POST") return res.status(405).end();
 
-  const { venueId, venueName, menu } = req.body as {
+  const { venueId, venueName, menu, menuConfig } = req.body as {
     venueId?: string;
     venueName?: string;
     menu?: Menu;
+    menuConfig?: Record<string, unknown>;
   };
 
   if (!venueId || !menu) return res.status(400).json({ error: "Invalid payload" });
@@ -41,6 +42,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       $set: {
         ...(venueName ? { name: venueName } : {}),
         menu,
+        ...(menuConfig ? { menuConfig } : {}),
       },
     }
   );
