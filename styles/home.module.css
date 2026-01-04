@@ -268,6 +268,44 @@
   color: var(--color-text-muted);
 }
 
+.emptySection {
+  min-height: 240px;
+  background: #fff;
+  color: var(--color-text);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+}
+
+.emptyInner {
+  display: grid;
+  gap: 0.4rem;
+}
+.emptyInner h2 {
+  margin: 0;
+  font-size: clamp(1.3rem, 3vw, 1.6rem);
+}
+.emptyInner p {
+  margin: 0;
+  opacity: 0.92;
+}
+
+.emptyButton {
+  margin: 0.25rem auto 0;
+  padding: 0.65rem 1.1rem;
+  background: var(--color-text);
+  color: #fff;
+  font-weight: 700;
+  border-radius: 12px;
+  text-decoration: none;
+  border: 1px solid var(--color-border);
+  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.08);
+}
+.emptyButton:hover {
+  opacity: 0.9;
+}
+
 @media (max-width: 720px) {
   .hero {
     padding: 1rem;

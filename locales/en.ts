@@ -78,6 +78,7 @@ export const en: TranslationDict = {
   "owner.modal.item.editTitle": "Edit item",
   "owner.empty.start": "Start your menu",
   "owner.empty.cta": "Add your first category",
+  "owner.selectMenuImage": "Select menu image",
 
   // QR
   "owner.qr.alt": "Menu QR code",

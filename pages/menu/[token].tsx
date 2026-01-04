@@ -1,4 +1,4 @@
-import Image from "next/image";
+import Image, { StaticImageData } from "next/image";
 import { GetServerSideProps } from "next";
 import { useEffect, useRef, useState } from "react";
 import { ObjectId } from "mongodb";
@@ -6,7 +6,11 @@ import { getDb } from "@/lib/mongodb";
 import styles from "@/styles/publicMenu.module.scss";
 import { LocalizedText, Menu } from "@/types/menu";
 import logo from "@/assets/lzz.png";
-import menuHeaderImg from "@/assets/menuHeaders/fast-food.jpg";
+import fastFoodImg from "@/assets/menuHeaders/fast-food.jpg";
+import bbqWingsImg from "@/assets/menuHeaders/bbq-wings.jpg";
+import berryDonutImg from "@/assets/menuHeaders/berry-donut.jpg";
+import pestoPenneImg from "@/assets/menuHeaders/pesto-penne.jpg";
+import salmonPokeImg from "@/assets/menuHeaders/salmon-poke.jpg";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faChevronDown, faChevronRight } from "@fortawesome/free-solid-svg-icons";
 
@@ -16,6 +20,7 @@ type Props = {
   withImages: boolean;
   menuBackgroundColor?: string;
   currency?: string;
+  menuImage?: string | null;
 };
 
 type Language = string;
@@ -33,12 +38,21 @@ function resolveText(value: LocalizedText | undefined, lang: Language) {
   );
 }
 
+function formatTitle(text: string) {
+  return text
+    .split(/\s+/)
+    .filter(Boolean)
+    .map((word) => word[0]?.toUpperCase() + word.slice(1).toLowerCase())
+    .join(" ");
+}
+
 export default function MenuPage({
   menu,
   languages: providedLanguages,
   withImages,
   menuBackgroundColor,
   currency,
+  menuImage,
 }: Props) {
   const languages =
     providedLanguages && providedLanguages.length > 0
@@ -61,6 +75,14 @@ export default function MenuPage({
   }[language];
 
   const bgColor = menuBackgroundColor || "#0f172a";
+  const headerMap: Record<string, StaticImageData> = {
+    fastFood: fastFoodImg,
+    bbqWings: bbqWingsImg,
+    berryDonut: berryDonutImg,
+    pestoPenne: pestoPenneImg,
+    salmonPoke: salmonPokeImg,
+  };
+  const headerImg = headerMap[menuImage || ""] || fastFoodImg;
 
   function isLight(hex: string) {
     const parsed = hex.replace("#", "");
@@ -100,7 +122,7 @@ export default function MenuPage({
       <div className={styles.content}>
         <div className={styles.redBanner} aria-hidden="true">
           <Image
-            src={menuHeaderImg}
+            src={headerImg}
             alt="Menu header"
             fill
             sizes="780px"
@@ -162,7 +184,7 @@ export default function MenuPage({
               aria-expanded={openCategories[cat.id] ?? false}
             >
               <h2 className={styles.sectionTitle}>
-                {resolveText(cat.title, language)}
+                {formatTitle(resolveText(cat.title, language))}
               </h2>
               <span className={styles.catToggle}>
                 <FontAwesomeIcon
@@ -272,6 +294,7 @@ export const getServerSideProps: GetServerSideProps<Props> = async (ctx) => {
       withImages: venue.menuConfig?.withImages !== false,
       menuBackgroundColor: venue.menuConfig?.menuBackgroundColor ?? undefined,
       currency: venue.menuConfig?.currency ?? "€",
+      menuImage: venue.menuConfig?.menuImage ?? null,
     },
   };
 };

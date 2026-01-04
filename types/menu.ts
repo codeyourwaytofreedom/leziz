@@ -21,6 +21,7 @@ export type Menu = {
     withImages?: boolean;
     menuBackgroundColor?: string;
     currency?: string;
+    menuImage?: string;
   };
   venueName?: LocalizedText;
 };

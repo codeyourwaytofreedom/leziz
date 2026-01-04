@@ -44,7 +44,7 @@ const plans = [
     price: "€175",
     periodKey: "pricing.premium.period",
     taglineKey: "pricing.premium.tagline",
-    highlightKey: "pricing.premium.highlight",
+    highlightKey: "pricing.feature.whatsapp",
     features: [
       "pricing.feature.languages6",
       "pricing.feature.logo",

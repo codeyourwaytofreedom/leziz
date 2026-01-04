@@ -77,6 +77,7 @@ export const de: TranslationDict = {
   "owner.modal.item.editTitle": "Artikel bearbeiten",
   "owner.empty.start": "Starten Sie Ihre Speisekarte",
   "owner.empty.cta": "Fügen Sie Ihre erste Kategorie hinzu",
+  "owner.selectMenuImage": "Menübild auswählen",
 
   "owner.qr.alt": "Speisekarten-QR-Code",
   "owner.qr.altLarge": "Großer Speisekarten-QR-Code",

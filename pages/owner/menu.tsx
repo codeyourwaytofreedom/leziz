@@ -2,7 +2,12 @@ import { GetServerSideProps } from "next";
 import Image from "next/image";
 import { useEffect, useState } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faFloppyDisk, faPlusCircle } from "@fortawesome/free-solid-svg-icons";
+import {
+  faChevronLeft,
+  faChevronRight,
+  faFloppyDisk,
+  faPlusCircle,
+} from "@fortawesome/free-solid-svg-icons";
 import { ObjectId } from "mongodb";
 import { getDb } from "@/lib/mongodb";
 import QRCode from "qrcode";
@@ -15,6 +20,11 @@ import { CategoryCard } from "@/components/menu/CategoryCard";
 import { Modal } from "@/components/menu/Modal";
 import styles from "@/styles/menu/menu.module.scss";
 import { Category, Menu, MenuItem, LocalizedText } from "@/types/menu";
+import bbqWingsImg from "@/assets/menuHeaders/bbq-wings.jpg";
+import berryDonutImg from "@/assets/menuHeaders/berry-donut.jpg";
+import fastFoodImg from "@/assets/menuHeaders/fast-food.jpg";
+import pestoPenneImg from "@/assets/menuHeaders/pesto-penne.jpg";
+import salmonPokeImg from "@/assets/menuHeaders/salmon-poke.jpg";
 
 type Language = string;
 const styleOptions = [
@@ -41,6 +51,7 @@ type Props = {
     withImages?: boolean;
     menuBackgroundColor?: string;
     currency?: string;
+    menuImage?: string;
   };
 };
 
@@ -115,6 +126,21 @@ export default function OwnerMenuPage({
   const [publicStyle, setPublicStyle] = useState(
     initialMenuConfig?.menuBackgroundColor ?? styleOptions[0].value
   );
+  const previewImages = [
+    { key: "fastFood", src: fastFoodImg },
+    { key: "bbqWings", src: bbqWingsImg },
+    { key: "berryDonut", src: berryDonutImg },
+    { key: "pestoPenne", src: pestoPenneImg },
+    { key: "salmonPoke", src: salmonPokeImg },
+  ];
+  const [previewKey, setPreviewKey] = useState<string>(
+    initialMenuConfig?.menuImage ?? previewImages[0].key
+  );
+  const foundPreviewIndex = previewImages.findIndex(
+    (img) => img.key === previewKey
+  );
+  const currentPreviewIndex = foundPreviewIndex >= 0 ? foundPreviewIndex : 0;
+  const currentPreview = previewImages[currentPreviewIndex] || previewImages[0];
 
   const [expandedCategoryId, setExpandedCategoryId] = useState<string | null>(
     null
@@ -591,6 +617,7 @@ export default function OwnerMenuPage({
           menuConfig: {
             ...(initialMenuConfig || {}),
             menuBackgroundColor: publicStyle,
+            menuImage: previewKey,
           },
         }),
       });
@@ -652,6 +679,58 @@ export default function OwnerMenuPage({
               styleOptions.find((o) => o.value === publicStyle)?.name || ""
             ).replace(/^\w/, (c) => c.toUpperCase())}
           </span>
+        </div>
+
+        <div className={styles.colorPreviewWrap}>
+          <span className={styles.styleLabel}>
+            {t("owner.selectMenuImage")}
+          </span>
+          <div className={styles.previewInner}>
+            <button
+              type="button"
+              className={`${styles.previewNav} ${styles.previewNavLeft}`}
+              aria-label="Previous image"
+              onClick={() =>
+                setPreviewKey((prevKey) => {
+                  const idx =
+                    previewImages.findIndex((img) => img.key === prevKey) ?? 0;
+                  const nextIdx =
+                    (idx - 1 + previewImages.length) % previewImages.length;
+                  const nextKey = previewImages[nextIdx].key;
+                  setHasChanges(true);
+                  return nextKey;
+                })
+              }
+            >
+              <FontAwesomeIcon icon={faChevronLeft} />
+            </button>
+            <div className={styles.colorPreview} aria-hidden="true">
+              <Image
+                src={currentPreview.src}
+                alt="Preview"
+                fill
+                sizes="260px"
+                className={styles.colorPreviewImage}
+              />
+            </div>
+            <button
+              type="button"
+              className={`${styles.previewNav} ${styles.previewNavRight}`}
+              aria-label="Next image"
+              onClick={() =>
+                setPreviewKey((prevKey) => {
+                  const idx =
+                    previewImages.findIndex((img) => img.key === prevKey) ?? 0;
+                  const nextIdx = (idx + 1) % previewImages.length;
+                  const nextKey = previewImages[nextIdx].key;
+                  setHasChanges(true);
+                  return nextKey;
+                })
+              }
+            >
+              <FontAwesomeIcon icon={faChevronRight} />
+            </button>
+          </div>
         </div>
 
         <div className={styles.languageRow}>
