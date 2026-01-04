@@ -6,21 +6,53 @@ import styles from "@/styles/pricing.module.scss";
 import { getSession } from "@/lib/session";
 import { getDb } from "@/lib/mongodb";
 import { ObjectId } from "mongodb";
+import { useI18n } from "@/lib/i18n";
 
 const plans = [
   {
-    name: "Monthly",
+    nameKey: "pricing.monthly.name",
     price: "€9",
-    period: "/month",
-    tagline: "Start flexible and grow your menu.",
-    highlight: "Cancel anytime",
+    periodKey: "pricing.monthly.period",
+    taglineKey: "pricing.monthly.tagline",
+    highlightKey: "pricing.monthly.highlight",
+    features: [
+      "pricing.feature.languages3",
+      "pricing.feature.unlimited",
+      "pricing.feature.qr",
+      "pricing.feature.editor",
+      " ",
+      " ",
+    ],
   },
   {
-    name: "Yearly",
+    nameKey: "pricing.yearly.name",
     price: "€90",
-    period: "/year",
-    tagline: "Best value for committed teams.",
-    highlight: "2 months free",
+    periodKey: "pricing.yearly.period",
+    taglineKey: "pricing.yearly.tagline",
+    highlightKey: "pricing.yearly.highlight",
+    features: [
+      "pricing.feature.languages3",
+      "pricing.feature.unlimited",
+      "pricing.feature.qr",
+      "pricing.feature.editor",
+      " ",
+      " ",
+    ],
+  },
+  {
+    nameKey: "pricing.premium.name",
+    price: "€175",
+    periodKey: "pricing.premium.period",
+    taglineKey: "pricing.premium.tagline",
+    highlightKey: "pricing.premium.highlight",
+    features: [
+      "pricing.feature.languages6",
+      "pricing.feature.logo",
+      "pricing.feature.whatsapp",
+      "pricing.feature.unlimited",
+      "pricing.feature.qr",
+      "pricing.feature.editor",
+    ],
   },
 ];
 
@@ -35,7 +67,10 @@ export default function PricingPage({
   venueName,
   role,
 }: PricingProps) {
-  const [selectedPlan, setSelectedPlan] = useState<string>("Yearly");
+  const { t } = useI18n();
+  const [selectedPlanKey, setSelectedPlanKey] = useState<string>(
+    "pricing.premium.name"
+  );
 
   return (
     <Layout
@@ -45,44 +80,44 @@ export default function PricingPage({
     >
       <div className={styles.page}>
         <header className={styles.header}>
-          <h1 className={styles.title}>Choose a plan that fits your venue</h1>
-          <p className={styles.subtitle}>
-            Simple pricing for multilingual menus, QR sharing, and real-time
-            updates.
-          </p>
+          <h1 className={styles.title}>{t("pricing.title")}</h1>
+          <p className={styles.subtitle}>{t("pricing.subtitle")}</p>
         </header>
 
         <div className={styles.cards}>
           {plans.map((plan) => (
             <button
-              key={plan.name}
+              key={plan.nameKey}
               className={`${styles.card} ${
-                selectedPlan === plan.name ? styles.cardSelected : ""
+                selectedPlanKey === plan.nameKey ? styles.cardSelected : ""
               }`}
               type="button"
-              onClick={() => setSelectedPlan(plan.name)}
-              aria-pressed={selectedPlan === plan.name}
+              onClick={() => setSelectedPlanKey(plan.nameKey)}
+              aria-pressed={selectedPlanKey === plan.nameKey}
             >
               <div className={styles.cardTop}>
-                <p className={styles.planName}>{plan.name}</p>
+                <p className={styles.planName}>{t(plan.nameKey)}</p>
                 <div className={styles.priceRow}>
                   <span className={styles.price}>{plan.price}</span>
-                  <span className={styles.period}>{plan.period}</span>
+                  <span className={styles.period}>{t(plan.periodKey)}</span>
                 </div>
-                <p className={styles.tagline}>{plan.tagline}</p>
-                {plan.highlight && (
-                  <span className={styles.badge}>{plan.highlight}</span>
+                <p className={styles.tagline}>{t(plan.taglineKey)}</p>
+                {plan.highlightKey && (
+                  <span className={styles.badge}>{t(plan.highlightKey)}</span>
                 )}
               </div>
               <div className={styles.cardBody}>
                 <ul className={styles.features}>
-                  <li>Unlimited categories and items</li>
-                  <li>Multilingual menu editing</li>
-                  <li>Live QR menu updates</li>
-                  <li>Staff-friendly editor</li>
+                  {plan.features.map((featKey, idx) =>
+                    featKey && featKey.trim().length > 0 ? (
+                      <li key={`${plan.nameKey}-${idx}`}>{t(featKey)}</li>
+                    ) : (
+                      <li key={`${plan.nameKey}-${idx}`} aria-hidden="true" />
+                    )
+                  )}
                 </ul>
                 <span className={styles.cta} aria-hidden="true">
-                  Get started
+                  {t("pricing.cta")}
                 </span>
               </div>
             </button>

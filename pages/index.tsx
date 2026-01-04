@@ -22,7 +22,7 @@ type HomeProps = {
 
 export default function Home({ isLoggedIn, venueName, role }: HomeProps) {
   const { t } = useI18n();
-  const primaryCta = isLoggedIn ? "/owner/menu" : "/login";
+  const primaryCta = isLoggedIn ? "/pricing" : "/pricing";
 
   return (
     <Layout
@@ -57,7 +57,7 @@ export default function Home({ isLoggedIn, venueName, role }: HomeProps) {
                 {t("home.cta.primary")}
               </Link>
               <Link
-                href="/menu/26af566b38fa6bda"
+                href="/menu/d11fcd2ed6454e6e"
                 target="blank"
                 className={styles.secondaryCta}
               >

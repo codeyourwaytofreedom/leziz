@@ -79,7 +79,7 @@ export default function BigBossPage() {
         setCreatedOwnerEmail(ownerEmail.trim());
         toast.addToast(t("bigboss.toast.userSuccess"), "success");
       }
-    } catch (err) {
+    } catch {
       toast.addToast(t("bigboss.toast.venueError"), "error");
     } finally {
       setLoading(false);
@@ -159,7 +159,9 @@ export default function BigBossPage() {
             />
           </label>
           <label style={{ display: "grid", gap: "0.35rem" }}>
-            <span style={{ fontWeight: 600 }}>{t("bigboss.ownerPassword")}</span>
+            <span style={{ fontWeight: 600 }}>
+              {t("bigboss.ownerPassword")}
+            </span>
             <input
               type="password"
               value={ownerPassword}

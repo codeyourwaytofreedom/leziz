@@ -64,22 +64,6 @@ function resolveText(value: LocalizedText | undefined, lang: Language) {
   );
 }
 
-function setLocalized(
-  value: LocalizedText | undefined,
-  lang: Language,
-  text: string
-): LocalizedText | undefined {
-  const nextText = text.trim();
-  const base = typeof value === "string" ? {} : value ?? {};
-
-  if (!nextText) {
-    const { [lang]: _removed, ...rest } = base;
-    return Object.keys(rest).length ? rest : undefined;
-  }
-
-  return { ...base, [lang]: nextText };
-}
-
 function buildIngredientsFromAllLanguages(
   perLanguage: Record<string, string>,
   languages: Language[]
@@ -540,9 +524,7 @@ export default function OwnerMenuPage({
       },
       {}
     );
-    const currentItem = menu.categories
-      .find((c) => c.id === editTarget.catId)
-      ?.items.find((i) => i.id === editTarget.itemId);
+
     const ingredients = buildIngredientsFromAllLanguages(
       editValues.ingredients,
       languages
