@@ -1,11 +1,14 @@
 import Image from "next/image";
 import { GetServerSideProps } from "next";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { ObjectId } from "mongodb";
 import { getDb } from "@/lib/mongodb";
 import styles from "@/styles/publicMenu.module.scss";
 import { LocalizedText, Menu } from "@/types/menu";
 import logo from "@/assets/lzz.png";
+import menuHeaderImg from "@/assets/menuHeaders/fast-food.jpg";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faChevronDown, faChevronRight } from "@fortawesome/free-solid-svg-icons";
 
 type Props = {
   menu: Menu;
@@ -42,6 +45,13 @@ export default function MenuPage({
       ? providedLanguages
       : (["en", "tr", "de"] as Language[]);
   const [language, setLanguage] = useState<Language>(languages[0] ?? "en");
+  const [langOpen, setLangOpen] = useState(false);
+  const langRef = useRef<HTMLDivElement | null>(null);
+  const [openCategories, setOpenCategories] = useState<Record<string, boolean>>(
+    () =>
+      Object.fromEntries((menu.categories || []).map((c) => [c.id, false])) ||
+      {}
+  );
   const currencySymbol = currency || "€";
 
   const ingredientsLabel = {
@@ -64,6 +74,22 @@ export default function MenuPage({
 
   const isLightBg = isLight(bgColor);
 
+  useEffect(() => {
+    function handleClick(e: MouseEvent) {
+      if (langOpen && langRef.current && !langRef.current.contains(e.target as Node)) {
+        setLangOpen(false);
+      }
+    }
+    document.addEventListener("mousedown", handleClick);
+    return () => document.removeEventListener("mousedown", handleClick);
+  }, [langOpen]);
+
+  useEffect(() => {
+    setOpenCategories(
+      Object.fromEntries((menu.categories || []).map((c) => [c.id, false]))
+    );
+  }, [menu.categories]);
+
   return (
     <div
       className={`${styles.page} ${
@@ -71,92 +97,140 @@ export default function MenuPage({
       }`}
       style={{ background: bgColor }}
     >
-      <div className={styles.topBar}>
-        {menuBackgroundColor && (
-          <div
-            className={styles.colorBadge}
-            style={{ backgroundColor: menuBackgroundColor }}
-            title={`Background: ${menuBackgroundColor}`}
-          />
-        )}
-        <div className={styles.languageSwitcher}>
-          {languages.map((lang) => (
-            <button
-              key={lang}
-              type="button"
-              onClick={() => setLanguage(lang)}
-              className={`${styles.languageButton} ${
-                language === lang ? styles.languageButtonActive : ""
-              }`}
-            >
-              {lang.toUpperCase()}
-            </button>
-          ))}
-        </div>
-      </div>
       <div className={styles.content}>
+        <div className={styles.redBanner} aria-hidden="true">
+          <Image
+            src={menuHeaderImg}
+            alt="Menu header"
+            fill
+            sizes="780px"
+            className={styles.redBannerImage}
+            priority
+          />
+          <div className={styles.topBar}>
+            {menuBackgroundColor && (
+              <div
+                className={styles.colorBadge}
+                style={{ backgroundColor: menuBackgroundColor }}
+                title={`Background: ${menuBackgroundColor}`}
+              />
+            )}
+            <div className={styles.languageDropdown} ref={langRef}>
+              <button
+                type="button"
+                className={styles.langToggle}
+                onClick={() => setLangOpen((o) => !o)}
+                aria-haspopup="true"
+                aria-expanded={langOpen}
+              >
+                <span className={styles.langFlag}>{language.toUpperCase()}</span>
+                <span className={styles.langCaret}>▾</span>
+              </button>
+              {langOpen && (
+                <div className={styles.langMenu} role="menu">
+                  {languages.map((lang) => (
+                    <button
+                      key={lang}
+                      type="button"
+                      className={`${styles.langOption} ${
+                        language === lang ? styles.langOptionActive : ""
+                      }`}
+                      onClick={() => {
+                        setLanguage(lang);
+                        setLangOpen(false);
+                      }}
+                    >
+                      <span>{lang.toUpperCase()}</span>
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
         {menu.categories.map((cat) => (
           <section key={cat.id} className={styles.section}>
-            <div className={styles.sectionHeader}>
+            <button
+              type="button"
+              className={styles.sectionHeader}
+              onClick={() =>
+                setOpenCategories((prev) => ({
+                  ...prev,
+                  [cat.id]: !(prev[cat.id] ?? true),
+                }))
+              }
+              aria-expanded={openCategories[cat.id] ?? false}
+            >
               <h2 className={styles.sectionTitle}>
                 {resolveText(cat.title, language)}
               </h2>
-            </div>
-            <div className={styles.items}>
-              {cat.items.map((item) => (
-                <div
-                  key={item.id}
-                  className={`${styles.item} ${
-                    !withImages ? styles.itemNoImage : ""
-                  }`}
-                >
-                  {withImages && (
-                    <div className={styles.itemImageWrap}>
-                      <Image
-                        src={logo}
-                        alt={`${resolveText(item.name, language)} placeholder`}
-                        fill
-                        sizes="140px"
-                        className={styles.itemImage}
-                      />
-                    </div>
-                  )}
-                  <div className={styles.itemBody}>
-                    <p className={styles.itemName}>
-                      {resolveText(item.name, language)}
-                    </p>
-                    {item.size && resolveText(item.size, language) && (
-                      <span className={styles.itemSize}>
-                        {resolveText(item.size, language)}
-                      </span>
-                    )}
-                    {resolveText(item.description, language) && (
-                      <p className={styles.itemDescription}>
-                        {resolveText(item.description, language)}
-                      </p>
-                    )}
-                    {item.ingredients && item.ingredients.length > 0 && (
-                      <div className={styles.itemIngredients}>
-                        <span className={styles.ingredientsLabel}>
-                          {ingredientsLabel}
-                        </span>
-                        <div className={styles.ingredientsList}>
-                          {item.ingredients.map((ing, idx) => (
-                            <span key={idx} className={styles.ingredientPill}>
-                              {resolveText(ing, language)}
-                            </span>
-                          ))}
-                        </div>
+              <span className={styles.catToggle}>
+                <FontAwesomeIcon
+                  icon={
+                    (openCategories[cat.id] ?? false)
+                      ? faChevronDown
+                      : faChevronRight
+                  }
+                />
+              </span>
+            </button>
+            {(openCategories[cat.id] ?? true) && (
+              <div className={styles.items}>
+                {cat.items.map((item) => (
+                  <div
+                    key={item.id}
+                    className={`${styles.item} ${
+                      !withImages ? styles.itemNoImage : ""
+                    }`}
+                  >
+                    {withImages && (
+                      <div className={styles.itemImageWrap}>
+                        <Image
+                          src={logo}
+                          alt={`${resolveText(item.name, language)} placeholder`}
+                          fill
+                          sizes="140px"
+                          className={styles.itemImage}
+                        />
                       </div>
                     )}
+                    <div className={styles.itemBody}>
+                      <p className={styles.itemName}>
+                        {resolveText(item.name, language)}
+                      </p>
+                      {item.size && resolveText(item.size, language) && (
+                        <span className={styles.itemSize}>
+                          {resolveText(item.size, language)}
+                        </span>
+                      )}
+                      {resolveText(item.description, language) && (
+                        <p className={styles.itemDescription}>
+                          {resolveText(item.description, language)}
+                        </p>
+                      )}
+                      {item.ingredients && item.ingredients.length > 0 && (
+                        <div className={styles.itemIngredients}>
+                          <span className={styles.ingredientsLabel}>
+                            {ingredientsLabel}
+                          </span>
+                          <div className={styles.ingredientsList}>
+                            {item.ingredients.map((ing, idx) => (
+                              <span key={idx} className={styles.ingredientPill}>
+                                {resolveText(ing, language)}
+                              </span>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                    <div className={styles.itemPrice}>
+                      {currencySymbol}
+                      {item.price.toFixed(2)}
+                    </div>
                   </div>
-                  <div className={styles.itemPrice}>
-                    {currencySymbol}
-                    {item.price.toFixed(2)}
-                  </div>
-                </div>
-              ))}
-            </div>
+                ))}
+              </div>
+            )}
           </section>
         ))}
 
