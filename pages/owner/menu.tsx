@@ -37,7 +37,11 @@ type Props = {
   languages: Language[];
   qrUrl?: string;
   qrDataUrl?: string;
-  menuConfig?: { withImages?: boolean; menuBackgroundColor?: string };
+  menuConfig?: {
+    withImages?: boolean;
+    menuBackgroundColor?: string;
+    currency?: string;
+  };
 };
 
 function uid(prefix = "id") {

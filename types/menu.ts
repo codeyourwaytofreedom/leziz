@@ -4,6 +4,7 @@ export type MenuItem = {
   id: string;
   name: LocalizedText;
   price: number;
+  size?: LocalizedText;
   description?: LocalizedText;
   ingredients?: LocalizedText[];
 };
@@ -19,6 +20,7 @@ export type Menu = {
   menuConfig?: {
     withImages?: boolean;
     menuBackgroundColor?: string;
+    currency?: string;
   };
   venueName?: LocalizedText;
 };

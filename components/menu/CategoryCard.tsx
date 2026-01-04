@@ -32,11 +32,15 @@ type ItemCardProps = {
 function ItemCard({ item, onEdit, onDelete, language, t }: ItemCardProps) {
   const displayName = resolveText(item.name, language);
   const displayDescription = resolveText(item.description, language);
+  const displaySize = item.size ? resolveText(item.size, language) : "";
 
   return (
     <div className={styles.itemCard}>
       <div className={styles.itemInfo}>
         <b>{displayName}</b>
+        {displaySize ? (
+          <div className={styles.itemSize}>{displaySize}</div>
+        ) : null}
         {displayDescription ? (
           <div className={styles.itemDescription}>{displayDescription}</div>
         ) : null}

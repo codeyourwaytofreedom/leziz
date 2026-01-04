@@ -12,6 +12,7 @@ type Props = {
   languages: string[];
   withImages: boolean;
   menuBackgroundColor?: string;
+  currency?: string;
 };
 
 type Language = string;
@@ -34,12 +35,14 @@ export default function MenuPage({
   languages: providedLanguages,
   withImages,
   menuBackgroundColor,
+  currency,
 }: Props) {
   const languages =
     providedLanguages && providedLanguages.length > 0
       ? providedLanguages
       : (["en", "tr", "de"] as Language[]);
   const [language, setLanguage] = useState<Language>(languages[0] ?? "en");
+  const currencySymbol = currency || "€";
 
   const ingredientsLabel = {
     en: "Ingredients",
@@ -122,6 +125,11 @@ export default function MenuPage({
                     <p className={styles.itemName}>
                       {resolveText(item.name, language)}
                     </p>
+                    {item.size && resolveText(item.size, language) && (
+                      <span className={styles.itemSize}>
+                        {resolveText(item.size, language)}
+                      </span>
+                    )}
                     {resolveText(item.description, language) && (
                       <p className={styles.itemDescription}>
                         {resolveText(item.description, language)}
@@ -143,7 +151,8 @@ export default function MenuPage({
                     )}
                   </div>
                   <div className={styles.itemPrice}>
-                    €{item.price.toFixed(2)}
+                    {currencySymbol}
+                    {item.price.toFixed(2)}
                   </div>
                 </div>
               ))}
@@ -188,6 +197,7 @@ export const getServerSideProps: GetServerSideProps<Props> = async (ctx) => {
       languages,
       withImages: venue.menuConfig?.withImages !== false,
       menuBackgroundColor: venue.menuConfig?.menuBackgroundColor ?? undefined,
+      currency: venue.menuConfig?.currency ?? "€",
     },
   };
 };
