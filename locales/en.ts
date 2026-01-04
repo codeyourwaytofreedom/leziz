@@ -5,6 +5,7 @@ export const en: TranslationDict = {
   "nav.menu": "My Menu",
   "nav.login": "Login",
   "nav.logout": "Logout",
+  "nav.pricing": "Pricing",
   "nav.language.en": "English",
   "nav.language.de": "Deutsch",
 
@@ -35,6 +36,10 @@ export const en: TranslationDict = {
   "home.section.gallery.title": "Built for dining rooms and patios",
   "home.section.gallery.subtitle":
     "From cozy bistros to lively pubs, deliver a consistent digital menu that feels premium and personal.",
+  "home.offers.title": "Ready to save on Leziz?",
+  "home.offers.subtitle":
+    "See monthly and yearly pricing—our yearly plan gives you 2 months free.",
+  "home.offers.button": "See offers",
   "home.gallery.ambience.title": "Ambience first",
   "home.gallery.ambience.desc":
     "Clean layouts that let your food and atmosphere shine—no clutter, just clarity.",
@@ -95,4 +100,14 @@ export const en: TranslationDict = {
   "bigboss.toast.venueSuccess": "Venue created",
   "bigboss.toast.userError": "Venue saved, user creation failed",
   "bigboss.toast.userSuccess": "Owner user created",
+
+  // Login
+  "login.title": "Log in",
+  "login.email": "Email",
+  "login.emailPlaceholder": "Enter your email",
+  "login.password": "Password",
+  "login.passwordPlaceholder": "Enter your password",
+  "login.loading": "Working...",
+  "login.submit": "Continue",
+  "login.error": "Invalid credentials",
 };

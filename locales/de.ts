@@ -4,6 +4,7 @@ export const de: TranslationDict = {
   "nav.menu": "Mein Menü",
   "nav.login": "Anmelden",
   "nav.logout": "Abmelden",
+  "nav.pricing": "Preise",
   "nav.language.en": "Englisch",
   "nav.language.de": "Deutsch",
 
@@ -34,6 +35,10 @@ export const de: TranslationDict = {
   "home.section.gallery.title": "Für Gastraum und Terrasse",
   "home.section.gallery.subtitle":
     "Von gemütlichen Bistros bis lebhaften Pubs – liefern Sie ein konsistentes digitales Menü, das hochwertig wirkt.",
+  "home.offers.title": "Bereit zu sparen mit Leziz?",
+  "home.offers.subtitle":
+    "Sehen Sie monatliche und jährliche Preise – beim Jahresplan erhalten Sie 2 Monate gratis.",
+  "home.offers.button": "Angebote ansehen",
   "home.gallery.ambience.title": "Ambiente zuerst",
   "home.gallery.ambience.desc":
     "Klare Layouts, die Speisen und Atmosphäre glänzen lassen – ohne Schnickschnack.",
@@ -95,4 +100,14 @@ export const de: TranslationDict = {
   "bigboss.toast.venueSuccess": "Restaurant angelegt",
   "bigboss.toast.userError": "Restaurant gespeichert, Benutzer fehlgeschlagen",
   "bigboss.toast.userSuccess": "Besitzer-Benutzer erstellt",
+
+  // Login
+  "login.title": "Anmelden",
+  "login.email": "E-Mail",
+  "login.emailPlaceholder": "E-Mail eingeben",
+  "login.password": "Passwort",
+  "login.passwordPlaceholder": "Passwort eingeben",
+  "login.loading": "Bitte warten...",
+  "login.submit": "Weiter",
+  "login.error": "Ungültige Zugangsdaten",
 };

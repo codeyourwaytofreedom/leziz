@@ -76,21 +76,6 @@ function setLocalized(
   return { ...base, [lang]: nextText };
 }
 
-function toLocalizedArray(
-  current: LocalizedText[] | undefined,
-  lang: Language,
-  raw: string
-): LocalizedText[] | undefined {
-  const parts = raw
-    .split(",")
-    .map((p) => p.trim())
-    .filter(Boolean);
-  if (!parts.length) return undefined;
-  return parts.map(
-    (part, idx) => setLocalized(current?.[idx], lang, part) ?? part
-  );
-}
-
 function buildIngredientsFromAllLanguages(
   perLanguage: Record<string, string>,
   languages: Language[]

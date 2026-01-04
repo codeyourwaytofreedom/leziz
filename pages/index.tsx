@@ -56,7 +56,11 @@ export default function Home({ isLoggedIn, venueName, role }: HomeProps) {
               <Link href={primaryCta} className={styles.primaryCta}>
                 {t("home.cta.primary")}
               </Link>
-              <Link href="/menu/demo66" className={styles.secondaryCta}>
+              <Link
+                href="/menu/26af566b38fa6bda"
+                target="blank"
+                className={styles.secondaryCta}
+              >
                 {t("home.cta.secondary")}
               </Link>
             </div>
@@ -85,10 +89,20 @@ export default function Home({ isLoggedIn, venueName, role }: HomeProps) {
                 priority
                 sizes="(min-width: 1024px) 420px, (min-width: 768px) 360px, 90vw"
               />
-              <div className={styles.heroCaption}>
-                {t("home.hero.caption")}
-              </div>
+              <div className={styles.heroCaption}>{t("home.hero.caption")}</div>
             </div>
+          </div>
+        </section>
+        <section
+          className={`${styles.section} ${styles.emptySection}`}
+          aria-label="Placeholder"
+        >
+          <div className={styles.emptyInner}>
+            <h2>{t("home.offers.title")}</h2>
+            <p>{t("home.offers.subtitle")}</p>
+            <Link href="/pricing" className={styles.emptyButton}>
+              {t("home.offers.button")}
+            </Link>
           </div>
         </section>
         <div className={styles.heroCardWide}>

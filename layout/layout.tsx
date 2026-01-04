@@ -104,6 +104,13 @@ export default function Layout({
             />
           </Link>
           <div className={styles.links}>
+            <Link
+              prefetch
+              href="/pricing"
+              className={isActive("/pricing") ? styles.active : undefined}
+            >
+              {t("nav.pricing")}
+            </Link>
             <div className={styles.dropdownStack}>
               {navActions.map((action) => {
                 if (action === "login") {

@@ -5,11 +5,13 @@ import type { GetServerSideProps } from "next";
 import Layout from "@/layout/layout";
 import styles from "@/styles/login.module.scss";
 import { getSession } from "@/lib/session";
+import { useI18n } from "@/lib/i18n";
 
 export default function LoginPage() {
   const router = useRouter();
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+  const { t } = useI18n();
 
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -29,7 +31,7 @@ export default function LoginPage() {
     });
 
     if (!res.ok) {
-      setError("Invalid credentials");
+      setError(t("login.error"));
       setLoading(false);
       return;
     }
@@ -54,36 +56,36 @@ export default function LoginPage() {
     <Layout>
       <div className={styles.wrapper}>
         <form className={styles.form} onSubmit={handleSubmit}>
-          <h1 className={styles.title}>Log in</h1>
+          <h1 className={styles.title}>{t("login.title")}</h1>
 
           <label className={styles.label} htmlFor="username">
-            Email
+            {t("login.email")}
           </label>
           <input
             id="username"
             name="username"
             type="email"
             className={styles.input}
-            placeholder="Enter your email"
+            placeholder={t("login.emailPlaceholder")}
             required
           />
 
           <label className={styles.label} htmlFor="password">
-            Password
+            {t("login.password")}
           </label>
           <input
             id="password"
             name="password"
             type="password"
             className={styles.input}
-            placeholder="Enter your password"
+            placeholder={t("login.passwordPlaceholder")}
             required
           />
 
           {error && <p style={{ color: "red" }}>{error}</p>}
 
           <button type="submit" className={styles.button}>
-            {loading ? "Working..." : "Continue"}
+            {loading ? t("login.loading") : t("login.submit")}
           </button>
         </form>
       </div>

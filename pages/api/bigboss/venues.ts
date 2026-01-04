@@ -1,6 +1,5 @@
 import type { NextApiRequest, NextApiResponse } from "next";
 import { randomBytes } from "crypto";
-import { ObjectId } from "mongodb";
 
 import { getDb } from "@/lib/mongodb";
 import { getSession } from "@/lib/session";
