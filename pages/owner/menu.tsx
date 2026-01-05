@@ -31,7 +31,6 @@ const styleOptions = [
   { name: "midnight", value: "#0f172a" },
   { name: "slate", value: "#1f2937" },
   { name: "charcoal", value: "#111827" },
-  { name: "forest", value: "#0f3d2e" },
   { name: "linen", value: "#f5f0e6" },
   { name: "sand", value: "#f4e7d3" },
   { name: "cloud", value: "#e5ecf5" },

@@ -100,9 +100,3 @@ a {
   color: var(--color-success-text);
   border-color: var(--color-success-border);
 }
-
-@media (prefers-color-scheme: dark) {
-  html {
-    color-scheme: dark;
-  }
-}
