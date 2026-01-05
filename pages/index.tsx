@@ -10,6 +10,14 @@ import waiterImg from "@/assets/landingPage/waiter-service.jpg";
 import corridorHeroImg from "@/assets/landingPage/corridor-cozy.jpg";
 import ambienceImg from "@/assets/landingPage/green-restaurant.jpg";
 import friendsImg from "@/assets/landingPage/friends-dining.jpg";
+import qrImg from "@/assets/qr.png";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import {
+  faUtensils,
+  faBurger,
+  faPizzaSlice,
+  faIceCream,
+} from "@fortawesome/free-solid-svg-icons";
 import { useI18n } from "@/lib/i18n";
 import { getDb } from "@/lib/mongodb";
 import { ObjectId } from "mongodb";
@@ -47,9 +55,42 @@ export default function Home({ isLoggedIn, venueName, role }: HomeProps) {
         <meta property="og:type" content="website" />
       </Head>
       <div className={styles.page}>
+        <div className={styles.banner}>
+          <div className={styles.qrRow}>
+            <div className={styles.qrContainer}>
+              <div className={styles.qrFloat} aria-hidden="true">
+                <span className={`${styles.qrIcon} ${styles.qrIcon1}`}>
+                  <FontAwesomeIcon icon={faUtensils} />
+                </span>
+                <span className={`${styles.qrIcon} ${styles.qrIcon2}`}>
+                  <FontAwesomeIcon icon={faBurger} />
+                </span>
+                <span className={`${styles.qrIcon} ${styles.qrIcon3}`}>
+                  <FontAwesomeIcon icon={faPizzaSlice} />
+                </span>
+                <span className={`${styles.qrIcon} ${styles.qrIcon4}`}>
+                  <FontAwesomeIcon icon={faIceCream} />
+                </span>
+                <div className={styles.qrFrame}>
+                  <Image
+                    src={qrImg}
+                    alt=""
+                    fill
+                    sizes="140px"
+                    className={styles.qrImage}
+                    priority
+                  />
+                </div>
+              </div>
+            </div>
+            <div className={styles.qrBannerText}>
+              <div className={styles.qrBannerTitle}>QR Menus</div>
+              <p className={styles.bannerTagline}>{t("home.tagline")}</p>
+            </div>
+          </div>
+        </div>
         <section className={styles.hero}>
           <div className={styles.heroContent}>
-            <p className={styles.eyebrow}>{t("home.tagline")}</p>
             <h1 className={styles.title}>{t("home.title")}</h1>
             <p className={styles.subtitle}>{t("home.subtitle")}</p>
             <div className={styles.ctaRow}>

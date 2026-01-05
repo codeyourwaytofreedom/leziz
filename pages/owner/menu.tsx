@@ -1,6 +1,6 @@
 import { GetServerSideProps } from "next";
 import Image from "next/image";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
   faChevronLeft,
@@ -31,13 +31,12 @@ const styleOptions = [
   { name: "midnight", value: "#0f172a" },
   { name: "slate", value: "#1f2937" },
   { name: "charcoal", value: "#111827" },
-  { name: "deep teal", value: "#155263" },
   { name: "forest", value: "#0f3d2e" },
-  { name: "ocean", value: "#367591" },
-  { name: "plum", value: "#4b1640" },
   { name: "linen", value: "#f5f0e6" },
   { name: "sand", value: "#f4e7d3" },
   { name: "cloud", value: "#e5ecf5" },
+  { name: "snow", value: "#f9fafb" },
+  { name: "pearl", value: "#f8f9fb" },
 ];
 
 type Props = {
@@ -179,6 +178,11 @@ export default function OwnerMenuPage({
     languages[0] ?? "en"
   );
   const [editVisible, setEditVisible] = useState(false);
+  const [moveHighlight, setMoveHighlight] = useState<{
+    catId: string;
+    itemId: string;
+  } | null>(null);
+  const moveHighlightTimeout = useRef<NodeJS.Timeout | null>(null);
   const [deleteTarget, setDeleteTarget] = useState<{
     catId: string;
     itemId: string;
@@ -416,6 +420,12 @@ export default function OwnerMenuPage({
   }, [deleteCategoryTarget]);
 
   useEffect(() => {
+    return () => {
+      if (moveHighlightTimeout.current) clearTimeout(moveHighlightTimeout.current);
+    };
+  }, []);
+
+  useEffect(() => {
     if (newCategoryOpen) {
       setNewCategoryVisible(false);
       const id = requestAnimationFrame(() => setNewCategoryVisible(true));
@@ -478,6 +488,33 @@ export default function OwnerMenuPage({
       }),
     }));
     setHasChanges(true);
+  }
+
+  function moveItem(catId: string, itemId: string, direction: "up" | "down") {
+    setMenu((m) => {
+      const catIndex = m.categories.findIndex((c) => c.id === catId);
+      if (catIndex === -1) return m;
+      const cat = m.categories[catIndex];
+      const idx = cat.items.findIndex((i) => i.id === itemId);
+      if (idx === -1) return m;
+      const targetIdx = direction === "up" ? idx - 1 : idx + 1;
+      if (targetIdx < 0 || targetIdx >= cat.items.length) return m;
+
+      const nextItems = [...cat.items];
+      const [moved] = nextItems.splice(idx, 1);
+      nextItems.splice(targetIdx, 0, moved);
+
+      const nextCategories = [...m.categories];
+      nextCategories[catIndex] = { ...cat, items: nextItems };
+
+      return { ...m, categories: nextCategories };
+    });
+    setHasChanges(true);
+    if (moveHighlightTimeout.current) clearTimeout(moveHighlightTimeout.current);
+    setMoveHighlight({ catId, itemId });
+    moveHighlightTimeout.current = setTimeout(() => {
+      setMoveHighlight(null);
+    }, 900);
   }
 
   function submitDelete(e: React.FormEvent) {
@@ -806,6 +843,9 @@ export default function OwnerMenuPage({
                 onAddItem={() => addItem(c.id)}
                 onRename={() => renameCategory(c.id)}
                 onDelete={() => deleteCategory(c.id)}
+                onMoveItem={(itemId, direction) =>
+                  moveItem(c.id, itemId, direction)
+                }
                 onEditItem={(itemId) => editItem(c.id, itemId)}
                 onDeleteItem={(itemId) => {
                   const item = c.items.find((i) => i.id === itemId);
@@ -815,6 +855,9 @@ export default function OwnerMenuPage({
                     name: resolveText(item?.name, language) || "Item",
                   });
                 }}
+                highlightItemId={
+                  moveHighlight?.catId === c.id ? moveHighlight.itemId : undefined
+                }
                 language={language}
                 t={t}
               />

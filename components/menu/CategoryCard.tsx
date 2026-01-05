@@ -3,6 +3,8 @@ import {
   faPen,
   faTrash,
   faChevronRight,
+  faArrowUp,
+  faArrowDown,
 } from "@fortawesome/free-solid-svg-icons";
 
 import { Category, MenuItem, LocalizedText } from "@/types/menu";
@@ -25,17 +27,37 @@ type ItemCardProps = {
   item: MenuItem;
   onEdit: () => void;
   onDelete: () => void;
+  onMoveUp: () => void;
+  onMoveDown: () => void;
+  disableMoveUp: boolean;
+  disableMoveDown: boolean;
+  isHighlighted: boolean;
   language: Language;
   t: (key: string) => string;
 };
 
-function ItemCard({ item, onEdit, onDelete, language, t }: ItemCardProps) {
+function ItemCard({
+  item,
+  onEdit,
+  onDelete,
+  onMoveUp,
+  onMoveDown,
+  disableMoveUp,
+  disableMoveDown,
+  isHighlighted,
+  language,
+  t,
+}: ItemCardProps) {
   const displayName = resolveText(item.name, language);
   const displayDescription = resolveText(item.description, language);
   const displaySize = item.size ? resolveText(item.size, language) : "";
 
   return (
-    <div className={styles.itemCard}>
+    <div
+      className={`${styles.itemCard} ${
+        isHighlighted ? styles.itemCardHighlight : ""
+      }`}
+    >
       <div className={styles.itemInfo}>
         <b>{displayName}</b>
         {displaySize ? (
@@ -57,6 +79,22 @@ function ItemCard({ item, onEdit, onDelete, language, t }: ItemCardProps) {
           <div className={styles.itemMeta}>
             <div>€{item.price.toFixed(2)}</div>
             <div className={styles.itemActions}>
+              <button
+                onClick={onMoveUp}
+                className={`${styles.btn} ${styles.btnSubtleDark} ${styles.btnIcon}`}
+                aria-label="Move item up"
+                disabled={disableMoveUp}
+              >
+                <FontAwesomeIcon icon={faArrowUp} />
+              </button>
+              <button
+                onClick={onMoveDown}
+                className={`${styles.btn} ${styles.btnSubtleDark} ${styles.btnIcon}`}
+                aria-label="Move item down"
+                disabled={disableMoveDown}
+              >
+                <FontAwesomeIcon icon={faArrowDown} />
+              </button>
               <button
                 onClick={onEdit}
                 className={`${styles.btn} ${styles.btnSubtleDark} ${styles.btnIcon}`}
@@ -84,8 +122,10 @@ type CategoryCardProps = {
   onAddItem: () => void;
   onRename: () => void;
   onDelete: () => void;
+  onMoveItem: (itemId: string, direction: "up" | "down") => void;
   onEditItem: (itemId: string) => void;
   onDeleteItem: (itemId: string) => void;
+  highlightItemId?: string;
   language: Language;
   t: (key: string) => string;
 };
@@ -97,8 +137,10 @@ export function CategoryCard({
   onAddItem,
   onRename,
   onDelete,
+  onMoveItem,
   onEditItem,
   onDeleteItem,
+  highlightItemId,
   language,
   t,
 }: CategoryCardProps) {
@@ -160,12 +202,17 @@ export function CategoryCard({
               </div>
             )}
 
-            {category.items.map((it) => (
+            {category.items.map((it, idx) => (
               <ItemCard
                 key={it.id}
                 item={it}
                 onEdit={() => onEditItem(it.id)}
                 onDelete={() => onDeleteItem(it.id)}
+                onMoveUp={() => onMoveItem(it.id, "up")}
+                onMoveDown={() => onMoveItem(it.id, "down")}
+                disableMoveUp={idx === 0}
+                disableMoveDown={idx === category.items.length - 1}
+                isHighlighted={highlightItemId === it.id}
                 language={language}
                 t={t}
               />

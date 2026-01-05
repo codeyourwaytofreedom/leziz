@@ -86,11 +86,15 @@
 
 .catToggle {
   background: transparent;
-  color: inherit;
+  color: #f7c948;
   border-radius: 8px;
   padding: 0.2rem 0.45rem;
   font-weight: 700;
   cursor: pointer;
+}
+
+.pageLight .catToggle {
+  color: #0f172a;
 }
 
 .items {
@@ -167,7 +171,7 @@
 
 .itemPrice {
   font-weight: 700;
-  color: #f7c948;
+  color: skyblue;
   font-size: 1.15rem;
   justify-self: center;
   grid-area: price;

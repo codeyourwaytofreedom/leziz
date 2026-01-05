@@ -10,7 +10,7 @@ export const en: TranslationDict = {
   "nav.language.de": "Deutsch",
 
   // Landing page
-  "home.tagline": "Menus that speak every language",
+  "home.tagline": "that speak every language",
   "home.title": "Serve guests faster with a beautifully translated digital menu.",
   "home.subtitle":
     "Build, translate, and publish your menu in minutes. Share with a QR code, update pricing on the fly, and keep guests in the loop in their own language.",
