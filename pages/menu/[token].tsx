@@ -107,6 +107,8 @@ export default function MenuPage({
   }, [langOpen]);
 
   useEffect(() => {
+    // safe: only sync open state when category list changes
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setOpenCategories(
       Object.fromEntries((menu.categories || []).map((c) => [c.id, false]))
     );
@@ -119,148 +121,156 @@ export default function MenuPage({
       }`}
       style={{ background: bgColor }}
     >
-      <div className={styles.content}>
-        <div className={styles.redBanner} aria-hidden="true">
-          <Image
-            src={headerImg}
-            alt="Menu header"
-            fill
-            sizes="780px"
-            className={styles.redBannerImage}
-            priority
-          />
-          <div className={styles.topBar}>
-            {menuBackgroundColor && (
-              <div
-                className={styles.colorBadge}
-                style={{ backgroundColor: menuBackgroundColor }}
-                title={`Background: ${menuBackgroundColor}`}
-              />
-            )}
-            <div className={styles.languageDropdown} ref={langRef}>
-              <button
-                type="button"
-                className={styles.langToggle}
-                onClick={() => setLangOpen((o) => !o)}
-                aria-haspopup="true"
-                aria-expanded={langOpen}
-              >
-                <span className={styles.langFlag}>{language.toUpperCase()}</span>
-                <span className={styles.langCaret}>▾</span>
-              </button>
-              {langOpen && (
-                <div className={styles.langMenu} role="menu">
-                  {languages.map((lang) => (
+      <div className={styles.phoneShell}>
+        <div className={styles.phoneFrame}>
+          <div className={styles.phoneScreen}>
+            <div className={styles.content}>
+              <div className={styles.redBanner} aria-hidden="true">
+                <Image
+                  src={headerImg}
+                  alt="Menu header"
+                  fill
+                  sizes="780px"
+                  className={styles.redBannerImage}
+                  priority
+                />
+                <div className={styles.topBar}>
+                  {menuBackgroundColor && (
+                    <div
+                      className={styles.colorBadge}
+                      style={{ backgroundColor: menuBackgroundColor }}
+                      title={`Background: ${menuBackgroundColor}`}
+                    />
+                  )}
+                  <div className={styles.languageDropdown} ref={langRef}>
                     <button
-                      key={lang}
                       type="button"
-                      className={`${styles.langOption} ${
-                        language === lang ? styles.langOptionActive : ""
-                      }`}
-                      onClick={() => {
-                        setLanguage(lang);
-                        setLangOpen(false);
-                      }}
+                      className={styles.langToggle}
+                      onClick={() => setLangOpen((o) => !o)}
+                      aria-haspopup="true"
+                      aria-expanded={langOpen}
                     >
-                      <span>{lang.toUpperCase()}</span>
+                      <span className={styles.langFlag}>
+                        {language.toUpperCase()}
+                      </span>
+                      <span className={styles.langCaret}>▾</span>
                     </button>
-                  ))}
+                    {langOpen && (
+                      <div className={styles.langMenu} role="menu">
+                        {languages.map((lang) => (
+                          <button
+                            key={lang}
+                            type="button"
+                            className={`${styles.langOption} ${
+                              language === lang ? styles.langOptionActive : ""
+                            }`}
+                            onClick={() => {
+                              setLanguage(lang);
+                              setLangOpen(false);
+                            }}
+                          >
+                            <span>{lang.toUpperCase()}</span>
+                          </button>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </div>
+              {menu.categories.map((cat) => (
+                <section key={cat.id} className={styles.section}>
+                  <button
+                    type="button"
+                    className={styles.sectionHeader}
+                    onClick={() =>
+                      setOpenCategories((prev) => ({
+                        ...prev,
+                        [cat.id]: !(prev[cat.id] ?? true),
+                      }))
+                    }
+                    aria-expanded={openCategories[cat.id] ?? false}
+                  >
+                    <h2 className={styles.sectionTitle}>
+                      {formatTitle(resolveText(cat.title, language))}
+                    </h2>
+                    <span className={styles.catToggle}>
+                      <FontAwesomeIcon
+                        icon={
+                          (openCategories[cat.id] ?? false)
+                            ? faChevronDown
+                            : faChevronRight
+                        }
+                      />
+                    </span>
+                  </button>
+                  {(openCategories[cat.id] ?? true) && (
+                    <div className={styles.items}>
+                      {cat.items.map((item) => (
+                        <div
+                          key={item.id}
+                          className={`${styles.item} ${
+                            !withImages ? styles.itemNoImage : ""
+                          }`}
+                        >
+                          {withImages && (
+                            <div className={styles.itemImageWrap}>
+                              <Image
+                                src={logo}
+                                alt={`${resolveText(item.name, language)} placeholder`}
+                                fill
+                                sizes="140px"
+                                className={styles.itemImage}
+                              />
+                            </div>
+                          )}
+                          <div className={styles.itemBody}>
+                            <p className={styles.itemName}>
+                              {resolveText(item.name, language)}
+                            </p>
+                            {item.size && resolveText(item.size, language) && (
+                              <span className={styles.itemSize}>
+                                {resolveText(item.size, language)}
+                              </span>
+                            )}
+                            {resolveText(item.description, language) && (
+                              <p className={styles.itemDescription}>
+                                {resolveText(item.description, language)}
+                              </p>
+                            )}
+                            {item.ingredients && item.ingredients.length > 0 && (
+                              <div className={styles.itemIngredients}>
+                                <span className={styles.ingredientsLabel}>
+                                  {ingredientsLabel}
+                                </span>
+                                <div className={styles.ingredientsList}>
+                                  {item.ingredients.map((ing, idx) => (
+                                    <span key={idx} className={styles.ingredientPill}>
+                                      {resolveText(ing, language)}
+                                    </span>
+                                  ))}
+                                </div>
+                              </div>
+                            )}
+                          </div>
+                          <div className={styles.itemPrice}>
+                            {currencySymbol}
+                            {item.price.toFixed(2)}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </section>
+              ))}
+
+              {menu.categories.length === 0 && (
+                <div className={styles.section}>
+                  <p>No menu items available yet.</p>
                 </div>
               )}
             </div>
           </div>
         </div>
-        {menu.categories.map((cat) => (
-          <section key={cat.id} className={styles.section}>
-            <button
-              type="button"
-              className={styles.sectionHeader}
-              onClick={() =>
-                setOpenCategories((prev) => ({
-                  ...prev,
-                  [cat.id]: !(prev[cat.id] ?? true),
-                }))
-              }
-              aria-expanded={openCategories[cat.id] ?? false}
-            >
-              <h2 className={styles.sectionTitle}>
-                {formatTitle(resolveText(cat.title, language))}
-              </h2>
-              <span className={styles.catToggle}>
-                <FontAwesomeIcon
-                  icon={
-                    (openCategories[cat.id] ?? false)
-                      ? faChevronDown
-                      : faChevronRight
-                  }
-                />
-              </span>
-            </button>
-            {(openCategories[cat.id] ?? true) && (
-              <div className={styles.items}>
-                {cat.items.map((item) => (
-                  <div
-                    key={item.id}
-                    className={`${styles.item} ${
-                      !withImages ? styles.itemNoImage : ""
-                    }`}
-                  >
-                    {withImages && (
-                      <div className={styles.itemImageWrap}>
-                        <Image
-                          src={logo}
-                          alt={`${resolveText(item.name, language)} placeholder`}
-                          fill
-                          sizes="140px"
-                          className={styles.itemImage}
-                        />
-                      </div>
-                    )}
-                    <div className={styles.itemBody}>
-                      <p className={styles.itemName}>
-                        {resolveText(item.name, language)}
-                      </p>
-                      {item.size && resolveText(item.size, language) && (
-                        <span className={styles.itemSize}>
-                          {resolveText(item.size, language)}
-                        </span>
-                      )}
-                      {resolveText(item.description, language) && (
-                        <p className={styles.itemDescription}>
-                          {resolveText(item.description, language)}
-                        </p>
-                      )}
-                      {item.ingredients && item.ingredients.length > 0 && (
-                        <div className={styles.itemIngredients}>
-                          <span className={styles.ingredientsLabel}>
-                            {ingredientsLabel}
-                          </span>
-                          <div className={styles.ingredientsList}>
-                            {item.ingredients.map((ing, idx) => (
-                              <span key={idx} className={styles.ingredientPill}>
-                                {resolveText(ing, language)}
-                              </span>
-                            ))}
-                          </div>
-                        </div>
-                      )}
-                    </div>
-                    <div className={styles.itemPrice}>
-                      {currencySymbol}
-                      {item.price.toFixed(2)}
-                    </div>
-                  </div>
-                ))}
-              </div>
-            )}
-          </section>
-        ))}
-
-        {menu.categories.length === 0 && (
-          <div className={styles.section}>
-            <p>No menu items available yet.</p>
-          </div>
-        )}
       </div>
     </div>
   );

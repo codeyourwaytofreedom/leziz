@@ -9,6 +9,7 @@ import {
   faRightFromBracket,
   faRightToBracket,
   faUtensils,
+  faMoneyBillWave,
 } from "@fortawesome/free-solid-svg-icons";
 
 import styles from "./layout.module.scss";
@@ -109,7 +110,11 @@ export default function Layout({
               href="/pricing"
               className={isActive("/pricing") ? styles.active : undefined}
             >
-              {t("nav.pricing")}
+              <FontAwesomeIcon
+                icon={faMoneyBillWave}
+                className={styles.btnIconInline}
+              />
+              <span className={styles.pricingLabel}> {t("nav.pricing")}</span>
             </Link>
             <div className={styles.dropdownStack}>
               {navActions.map((action) => {
@@ -124,8 +129,11 @@ export default function Layout({
                       <FontAwesomeIcon
                         icon={faRightToBracket}
                         className={styles.btnIconInline}
-                      />{" "}
-                      {t("nav.login")}
+                      />
+                      <span className={styles.loginLabel}>
+                        {" "}
+                        {t("nav.login")}
+                      </span>
                     </Link>
                   );
                 }
