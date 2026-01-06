@@ -11,6 +11,7 @@ import { useI18n } from "@/lib/i18n";
 const plans = [
   {
     nameKey: "pricing.monthly.name",
+    slug: "monthly",
     price: "€9",
     periodKey: "pricing.monthly.period",
     taglineKey: "pricing.monthly.tagline",
@@ -26,6 +27,7 @@ const plans = [
   },
   {
     nameKey: "pricing.yearly.name",
+    slug: "yearly",
     price: "€90",
     periodKey: "pricing.yearly.period",
     taglineKey: "pricing.yearly.tagline",
@@ -41,6 +43,7 @@ const plans = [
   },
   {
     nameKey: "pricing.premium.name",
+    slug: "premium",
     price: "€175",
     periodKey: "pricing.premium.period",
     taglineKey: "pricing.premium.tagline",
@@ -116,9 +119,12 @@ export default function PricingPage({
                     )
                   )}
                 </ul>
-                <span className={styles.cta} aria-hidden="true">
+                <a
+                  className={styles.cta}
+                  href={`/signup?plan=${plan.slug}`}
+                >
                   {t("pricing.cta")}
-                </span>
+                </a>
               </div>
             </button>
           ))}

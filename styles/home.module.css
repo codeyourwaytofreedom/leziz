@@ -3,6 +3,46 @@
   gap: 2.5rem;
 }
 
+.banner {
+  height: 200px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+  position: relative;
+}
+
+.qrRow {
+  display: flex;
+  align-items: center;
+  gap: 1.25rem;
+}
+
+.qrBannerText {
+  display: flex;
+  flex-direction: column;
+  gap: 0.1rem;
+  align-items: flex-end;
+  text-align: right;
+  height: 110px;
+  justify-content: center;
+}
+
+.qrBannerTitle {
+  font-size: clamp(3rem, 8vw, 5.6rem);
+  font-weight: 500;
+  letter-spacing: -0.02em;
+  color: #0f172a;
+  line-height: 0.95;
+}
+
+.bannerTagline {
+  margin: 0;
+  font-weight: 700;
+  color: rgba(15, 23, 42, 0.65);
+  font-size: 1.05rem;
+}
+
 .hero {
   background: linear-gradient(135deg, #f8fafc, #eef2ff);
   border: 1px solid var(--color-border);
@@ -35,7 +75,7 @@
   display: grid;
   place-items: center;
   overflow: visible;
-  transform: translate(0, 0) scale(1);
+  transform: none;
   opacity: 1;
   pointer-events: none;
 }

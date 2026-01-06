@@ -1,6 +1,6 @@
 import Image, { StaticImageData } from "next/image";
 import { GetServerSideProps } from "next";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { ObjectId } from "mongodb";
 import { getDb } from "@/lib/mongodb";
 import styles from "@/styles/publicMenu.module.scss";
@@ -54,13 +54,17 @@ export default function MenuPage({
   currency,
   menuImage,
 }: Props) {
-  const languages =
-    providedLanguages && providedLanguages.length > 0
-      ? providedLanguages
-      : (["en", "tr", "de"] as Language[]);
-  const [language, setLanguage] = useState<Language>(languages[0] ?? "en");
+  const languages = useMemo(
+    () =>
+      providedLanguages && providedLanguages.length > 0
+        ? providedLanguages
+        : (["en", "tr", "de"] as Language[]),
+    [providedLanguages]
+  );
+  const [language, setLanguage] = useState<Language>(() => languages[0] ?? "en");
   const [langOpen, setLangOpen] = useState(false);
   const langRef = useRef<HTMLDivElement | null>(null);
+  const didSetLangFromBrowser = useRef(false);
   const [openCategories, setOpenCategories] = useState<Record<string, boolean>>(
     () =>
       Object.fromEntries((menu.categories || []).map((c) => [c.id, false])) ||
@@ -113,6 +117,21 @@ export default function MenuPage({
       Object.fromEntries((menu.categories || []).map((c) => [c.id, false]))
     );
   }, [menu.categories]);
+
+  useEffect(() => {
+    if (didSetLangFromBrowser.current) return;
+    if (typeof window === "undefined") return;
+    const browserLang = navigator.language?.split("-")[0]?.toLowerCase();
+    if (!browserLang) return;
+    const match = languages.find(
+      (lang) => lang.toLowerCase() === browserLang
+    );
+    if (match && match !== language) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
+      setLanguage(match as Language);
+    }
+    didSetLangFromBrowser.current = true;
+  }, [languages, language]);
 
   return (
     <div

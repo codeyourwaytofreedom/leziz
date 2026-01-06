@@ -10,6 +10,8 @@ import {
   faRightToBracket,
   faUtensils,
   faMoneyBillWave,
+  faList,
+  faUser,
 } from "@fortawesome/free-solid-svg-icons";
 
 import styles from "./layout.module.scss";
@@ -60,6 +62,8 @@ export default function Layout({
 
   const shouldShowLogin = showLogin && !isLoggedIn;
   const shouldShowOwnerLinks = isLoggedIn;
+  const [menuOpen, setMenuOpen] = useState(false);
+  const menuRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
     function handleClick(e: MouseEvent) {
@@ -74,10 +78,13 @@ export default function Layout({
       ) {
         setProfileOpen(false);
       }
+      if (menuOpen && menuRef.current && !menuRef.current.contains(target)) {
+        setMenuOpen(false);
+      }
     }
     document.addEventListener("mousedown", handleClick);
     return () => document.removeEventListener("mousedown", handleClick);
-  }, [langOpen, profileOpen]);
+  }, [langOpen, profileOpen, menuOpen]);
 
   async function handleLogout() {
     try {
@@ -105,6 +112,72 @@ export default function Layout({
             />
           </Link>
           <div className={styles.links}>
+            <div
+              className={`${styles.dropdownStack} ${styles.menuStack}`}
+              ref={menuRef}
+            >
+              <button
+                type="button"
+                className={styles.navIconButton}
+                aria-label="Menu list"
+                onClick={() => setMenuOpen((o) => !o)}
+                aria-haspopup="true"
+                aria-expanded={menuOpen}
+              >
+                <FontAwesomeIcon
+                  icon={faList}
+                  className={styles.btnIconInline}
+                />
+              </button>
+              {menuOpen && (
+                <div className={styles.langMenu} role="menu">
+                  <Link
+                    prefetch
+                    href="/pricing"
+                    className={styles.langMenuItem}
+                    onClick={() => setMenuOpen(false)}
+                  >
+                    <FontAwesomeIcon icon={faMoneyBillWave} />
+                    <span>{t("nav.pricing")}</span>
+                  </Link>
+                  {!isLoggedIn && (
+                    <Link
+                      prefetch
+                      href="/login"
+                      className={styles.langMenuItem}
+                      onClick={() => setMenuOpen(false)}
+                    >
+                      <FontAwesomeIcon icon={faRightToBracket} />
+                      <span>{t("nav.login")}</span>
+                    </Link>
+                  )}
+                  {shouldShowOwnerLinks && (
+                    <Link
+                      prefetch
+                      href="/owner/menu"
+                      className={styles.langMenuItem}
+                      onClick={() => setMenuOpen(false)}
+                    >
+                      <FontAwesomeIcon icon={faUtensils} />
+                      <span>{t("nav.menu")}</span>
+                    </Link>
+                  )}
+                  {navRole !== "guest" && (
+                    <button
+                      type="button"
+                      className={styles.langMenuItem}
+                      onClick={() => {
+                        setMenuOpen(false);
+                        handleLogout();
+                      }}
+                    >
+                      <FontAwesomeIcon icon={faRightFromBracket} />
+                      <span>{t("nav.logout")}</span>
+                    </button>
+                  )}
+                </div>
+              )}
+            </div>
             <Link
               prefetch
               href="/pricing"
@@ -124,7 +197,9 @@ export default function Layout({
                       key="login"
                       prefetch
                       href="/login"
-                      className={isActive("/login") ? styles.active : undefined}
+                      className={`${styles.navLogin} ${
+                        isActive("/login") ? styles.active : ""
+                      }`}
                     >
                       <FontAwesomeIcon
                         icon={faRightToBracket}
@@ -163,22 +238,25 @@ export default function Layout({
                 return (
                   <div
                     key="profile"
-                    className={styles.langSwitch}
+                    className={`${styles.langSwitch} ${styles.profileStack}`}
                     ref={profileRef}
                   >
                     <button
                       type="button"
-                      className={styles.langDropdownToggle}
-                      aria-label="Profile"
-                      onClick={() => setProfileOpen((o) => !o)}
-                      aria-haspopup="true"
-                      aria-expanded={profileOpen}
-                    >
-                      <span className={styles.langLabel}>
-                        {profileLabel}
-                      </span>
-                      <span className={styles.langCaret}>▾</span>
-                    </button>
+                      className={styles.profileDropdownToggle}
+                    aria-label="Profile"
+                    onClick={() => setProfileOpen((o) => !o)}
+                    aria-haspopup="true"
+                    aria-expanded={profileOpen}
+                  >
+                    <FontAwesomeIcon
+                      icon={navRole === "bigboss" ? faCrown : faUser}
+                      className={styles.btnIconInline}
+                    />
+                    <span className={styles.langLabel}>
+                      {profileLabel}
+                    </span>
+                  </button>
                     {profileOpen && (
                       <div
                         className={`${styles.langMenu} ${styles.profileMenu}`}
