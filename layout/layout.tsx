@@ -307,7 +307,11 @@ export default function Layout({
                   aria-expanded={langOpen}
                 >
                   <span className={styles.langFlag}>
-                    {locale === "de" ? "🇩🇪" : "🇬🇧"}
+                    {locale === "de"
+                      ? "🇩🇪"
+                      : locale === "tr"
+                      ? "🇹🇷"
+                      : "🇬🇧"}
                   </span>
                   <span className={styles.langCaret}>▾</span>
                 </button>
@@ -325,7 +329,7 @@ export default function Layout({
                       }}
                     >
                       <span className={styles.langFlag}>🇬🇧</span>
-                      <span>English</span>
+                      <span>{t("nav.language.en")}</span>
                       {locale === "en" && (
                         <span className={styles.langCheck}>✔</span>
                       )}
@@ -339,8 +343,22 @@ export default function Layout({
                       }}
                     >
                       <span className={styles.langFlag}>🇩🇪</span>
-                      <span>Deutsch</span>
+                      <span>{t("nav.language.de")}</span>
                       {locale === "de" && (
+                        <span className={styles.langCheck}>✔</span>
+                      )}
+                    </button>
+                    <button
+                      type="button"
+                      className={styles.langMenuItem}
+                      onClick={() => {
+                        setLocale("tr");
+                        setLangOpen(false);
+                      }}
+                    >
+                      <span className={styles.langFlag}>🇹🇷</span>
+                      <span>{t("nav.language.tr")}</span>
+                      {locale === "tr" && (
                         <span className={styles.langCheck}>✔</span>
                       )}
                     </button>

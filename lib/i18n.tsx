@@ -9,11 +9,12 @@ import React, {
 
 import { de } from "@/locales/de";
 import { en } from "@/locales/en";
+import { tr } from "@/locales/tr";
 import { TranslationDict } from "@/locales/types";
 
-type Locale = "en" | "de";
+type Locale = "en" | "de" | "tr";
 
-const translations: Record<Locale, TranslationDict> = { en, de };
+const translations: Record<Locale, TranslationDict> = { en, de, tr };
 
 const I18nContext = createContext<{
   locale: Locale;
@@ -38,14 +39,14 @@ export function I18nProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     if (typeof window === "undefined") return;
     const saved = window.localStorage.getItem("locale") as Locale | null;
-    if (saved && (saved === "en" || saved === "de")) {
+    if (saved && (saved === "en" || saved === "de" || saved === "tr")) {
       // eslint-disable-next-line react-hooks/set-state-in-effect
       setLocaleState(saved);
       return;
     }
     const browser = window.navigator.language.slice(0, 2);
     // eslint-disable-next-line react-hooks/set-state-in-effect
-    setLocaleState(browser === "de" ? "de" : "en");
+    setLocaleState(browser === "de" ? "de" : browser === "tr" ? "tr" : "en");
   }, []);
 
   const setLocale = useCallback((next: Locale) => {

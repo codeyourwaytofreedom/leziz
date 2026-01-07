@@ -111,15 +111,15 @@ export default function Home({ isLoggedIn, venueName, role }: HomeProps) {
             </div>
             <div className={styles.stats}>
               <div>
-                <strong>3+</strong>
+                <strong>{t("home.stats.languages.value")}</strong>
                 <span>{t("home.stats.languages")}</span>
               </div>
               <div>
-                <strong>1 click</strong>
+                <strong>{t("home.stats.qr.value")}</strong>
                 <span>{t("home.stats.qr")}</span>
               </div>
               <div>
-                <strong>0 hassle</strong>
+                <strong>{t("home.stats.nopdf.value")}</strong>
                 <span>{t("home.stats.nopdf")}</span>
               </div>
             </div>

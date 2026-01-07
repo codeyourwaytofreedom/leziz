@@ -1,9 +1,11 @@
 .page {
   display: grid;
   gap: 1rem;
-  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-  align-items: start;
+  align-items: center;
+  align-content: center;
   padding: 1rem;
+  grid-template-columns: 1fr;
+  justify-items: center;
 }
 
 .card {
@@ -12,7 +14,8 @@
   padding: 1rem;
   background: var(--color-surface);
   box-shadow: 0 10px 24px var(--color-card-shadow);
-  max-width: 600px;
+  width: 100%;
+  max-width: 500px !important;
 }
 
 .formCard {
@@ -63,7 +66,8 @@
   display: grid;
   gap: 0.5rem;
   box-shadow: none;
-  max-width: 600px;
+  width: 100%;
+  max-width: 760px !important;
   width: 100%;
 }
 
@@ -91,6 +95,10 @@
 .emailHighlight {
   font-weight: 700;
   color: var(--color-text);
+}
+
+.sentCodeMessage {
+  display: inline;
 }
 
 .stripeCard {

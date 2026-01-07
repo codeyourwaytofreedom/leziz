@@ -6,6 +6,7 @@ import Layout from "@/layout/layout";
 import styles from "@/styles/login.module.scss";
 import { getSession } from "@/lib/session";
 import { useI18n } from "@/lib/i18n";
+import LoadingButton from "@/components/LoadingButton";
 
 export default function LoginPage() {
   const router = useRouter();
@@ -15,6 +16,7 @@ export default function LoginPage() {
 
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
+    if (loading) return;
     setError("");
     setLoading(true);
 
@@ -47,8 +49,6 @@ export default function LoginPage() {
       router.push(next);
     } catch {
       router.push("/owner/menu");
-    } finally {
-      setLoading(false);
     }
   };
 
@@ -67,6 +67,7 @@ export default function LoginPage() {
             type="email"
             className={styles.input}
             placeholder={t("login.emailPlaceholder")}
+            disabled={loading}
             required
           />
 
@@ -79,14 +80,21 @@ export default function LoginPage() {
             type="password"
             className={styles.input}
             placeholder={t("login.passwordPlaceholder")}
+            disabled={loading}
             required
           />
 
           {error && <p style={{ color: "red" }}>{error}</p>}
 
-          <button type="submit" className={styles.button}>
-            {loading ? t("login.loading") : t("login.submit")}
-          </button>
+          <LoadingButton
+            type="submit"
+            className={styles.button}
+            loading={loading}
+            loadingLabel={t("login.loading")}
+            disabled={loading}
+          >
+            {t("login.submit")}
+          </LoadingButton>
         </form>
       </div>
     </Layout>
