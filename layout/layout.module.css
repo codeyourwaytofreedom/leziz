@@ -284,6 +284,14 @@
     padding: 0.3rem 0.45rem 0.25rem;
     text-align: center;
   }
+  .profileDropdownToggle {
+    display: grid;
+    grid-auto-flow: row;
+    justify-items: center;
+    align-items: center;
+    padding: 0.3rem 0.45rem 0.25rem;
+    text-align: center;
+  }
   .links a.langMenuItem {
     display: flex !important;
     justify-content: flex-start;
@@ -321,5 +329,8 @@
   }
   .langLabel {
     display: none;
+  }
+  .navLogin {
+    display: none !important;
   }
 }/*# sourceMappingURL=layout.module.css.map */

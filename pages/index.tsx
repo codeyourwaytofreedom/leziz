@@ -12,12 +12,14 @@ import ambienceImg from "@/assets/landingPage/green-restaurant.jpg";
 import friendsImg from "@/assets/landingPage/friends-dining.jpg";
 import qrImg from "@/assets/qr.png";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import type { IconProp } from "@fortawesome/fontawesome-svg-core";
 import {
   faUtensils,
   faBurger,
   faPizzaSlice,
   faIceCream,
 } from "@fortawesome/free-solid-svg-icons";
+import { faWhatsapp } from "@fortawesome/free-brands-svg-icons";
 import { useI18n } from "@/lib/i18n";
 import { getDb } from "@/lib/mongodb";
 import { ObjectId } from "mongodb";
@@ -31,6 +33,8 @@ type HomeProps = {
 export default function Home({ isLoggedIn, venueName, role }: HomeProps) {
   const { t } = useI18n();
   const primaryCta = isLoggedIn ? "/pricing" : "/pricing";
+  const whatsappUrl =
+    process.env.NEXT_PUBLIC_WHATSAPP_URL || "https://wa.me/";
 
   return (
     <Layout
@@ -216,6 +220,15 @@ export default function Home({ isLoggedIn, venueName, role }: HomeProps) {
           </div>
         </section>
       </div>
+      <a
+        className={styles.whatsappFloat}
+        href={whatsappUrl}
+        target="_blank"
+        rel="noopener noreferrer"
+        aria-label="WhatsApp"
+      >
+        <FontAwesomeIcon icon={faWhatsapp as IconProp} beat />
+      </a>
     </Layout>
   );
 }

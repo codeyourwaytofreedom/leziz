@@ -34,7 +34,7 @@ function verifySignature(token: string) {
 
 export function createSignupToken(data: Omit<SignupTokenPayload, "exp" | "iat"> & { exp?: number }) {
   const now = Date.now();
-  const exp = data.exp ?? now + 15 * 60 * 1000; // 15 minutes
+  const exp = data.exp ?? now + 2 * 60 * 1000; // 2 minutes
   return sign({ ...data, iat: now, exp });
 }
 

@@ -1,5 +1,5 @@
-import { useState } from "react";
 import { GetServerSideProps } from "next";
+import Link from "next/link";
 
 import Layout from "@/layout/layout";
 import styles from "@/styles/pricing.module.scss";
@@ -10,12 +10,12 @@ import { useI18n } from "@/lib/i18n";
 
 const plans = [
   {
-    nameKey: "pricing.monthly.name",
-    slug: "monthly",
-    price: "€9",
-    periodKey: "pricing.monthly.period",
-    taglineKey: "pricing.monthly.tagline",
-    highlightKey: "pricing.monthly.highlight",
+    nameKey: "pricing.silver.name",
+    slug: "silver",
+    price: "$9.90",
+    periodKey: "pricing.silver.period",
+    taglineKey: "pricing.silver.tagline",
+    highlightKey: "pricing.silver.highlight",
     features: [
       "pricing.feature.languages3",
       "pricing.feature.unlimited",
@@ -26,28 +26,12 @@ const plans = [
     ],
   },
   {
-    nameKey: "pricing.yearly.name",
-    slug: "yearly",
-    price: "€90",
-    periodKey: "pricing.yearly.period",
-    taglineKey: "pricing.yearly.tagline",
-    highlightKey: "pricing.yearly.highlight",
-    features: [
-      "pricing.feature.languages3",
-      "pricing.feature.unlimited",
-      "pricing.feature.qr",
-      "pricing.feature.editor",
-      " ",
-      " ",
-    ],
-  },
-  {
-    nameKey: "pricing.premium.name",
-    slug: "premium",
-    price: "€175",
-    periodKey: "pricing.premium.period",
-    taglineKey: "pricing.premium.tagline",
-    highlightKey: "pricing.feature.whatsapp",
+    nameKey: "pricing.gold.name",
+    slug: "gold",
+    price: "$19.90",
+    periodKey: "pricing.gold.period",
+    taglineKey: "pricing.gold.tagline",
+    highlightKey: "pricing.gold.highlight",
     features: [
       "pricing.feature.languages6",
       "pricing.feature.logo",
@@ -71,9 +55,6 @@ export default function PricingPage({
   role,
 }: PricingProps) {
   const { t } = useI18n();
-  const [selectedPlanKey, setSelectedPlanKey] = useState<string>(
-    "pricing.premium.name"
-  );
 
   return (
     <Layout
@@ -89,14 +70,12 @@ export default function PricingPage({
 
         <div className={styles.cards}>
           {plans.map((plan) => (
-            <button
+            <Link
               key={plan.nameKey}
               className={`${styles.card} ${
-                selectedPlanKey === plan.nameKey ? styles.cardSelected : ""
+                plan.slug === "silver" ? styles.cardSilver : styles.cardGold
               }`}
-              type="button"
-              onClick={() => setSelectedPlanKey(plan.nameKey)}
-              aria-pressed={selectedPlanKey === plan.nameKey}
+              href={`/signup?plan=${plan.slug}`}
             >
               <div className={styles.cardTop}>
                 <p className={styles.planName}>{t(plan.nameKey)}</p>
@@ -104,7 +83,6 @@ export default function PricingPage({
                   <span className={styles.price}>{plan.price}</span>
                   <span className={styles.period}>{t(plan.periodKey)}</span>
                 </div>
-                <p className={styles.tagline}>{t(plan.taglineKey)}</p>
                 {plan.highlightKey && (
                   <span className={styles.badge}>{t(plan.highlightKey)}</span>
                 )}
@@ -119,14 +97,9 @@ export default function PricingPage({
                     )
                   )}
                 </ul>
-                <a
-                  className={styles.cta}
-                  href={`/signup?plan=${plan.slug}`}
-                >
-                  {t("pricing.cta")}
-                </a>
+                <span className={styles.cta}>{t("pricing.cta")}</span>
               </div>
-            </button>
+            </Link>
           ))}
         </div>
       </div>

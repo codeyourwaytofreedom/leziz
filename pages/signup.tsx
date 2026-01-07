@@ -1,45 +1,48 @@
-import { FormEvent, useState } from "react";
+import { FormEvent, useEffect, useState } from "react";
 import { useRouter } from "next/router";
 import { GetServerSideProps } from "next";
 import Layout from "@/layout/layout";
 import styles from "@/styles/signup.module.scss";
 import { getSession } from "@/lib/session";
+import { useI18n } from "@/lib/i18n";
 
 type PlanInfo = {
-  label: string;
+  labelKey: string;
   price: string;
-  period: string;
-  summary: string;
+  periodKey: string;
+  summaryKey: string;
 };
 
 const planDetails: Record<string, PlanInfo> = {
-  monthly: {
-    label: "Monthly",
-    price: "€9",
-    period: "/month",
-    summary: "Up to 3 languages, unlimited items, QR updates.",
+  silver: {
+    labelKey: "signup.plan.silver.label",
+    price: "$9.90",
+    periodKey: "signup.plan.period.month",
+    summaryKey: "signup.plan.silver.summary",
   },
-  yearly: {
-    label: "Yearly",
-    price: "€90",
-    period: "/year",
-    summary: "Same as monthly with 2 months free.",
-  },
-  premium: {
-    label: "Premium",
-    price: "€175",
-    period: "/year",
-    summary: "6 languages, logo, WhatsApp link, unlimited updates.",
+  gold: {
+    labelKey: "signup.plan.gold.label",
+    price: "$19.90",
+    periodKey: "signup.plan.period.month",
+    summaryKey: "signup.plan.gold.summary",
   },
 };
 
 export default function SignupPage() {
   const router = useRouter();
-  const plan = (router.query.plan as string) || "monthly";
-  const planInfo = planDetails[plan] ?? planDetails.monthly;
+  const { t } = useI18n();
+  const plan = (router.query.plan as string) || "silver";
+  const planInfo = planDetails[plan] ?? planDetails.silver;
   const [message, setMessage] = useState("");
-  const [step, setStep] = useState<"details" | "code">("details");
-  const [verificationToken, setVerificationToken] = useState<string | null>(null);
+  const [sentToEmail, setSentToEmail] = useState<string | null>(null);
+  const [step, setStep] = useState<"details" | "code" | "stripe">("details");
+  const [verificationToken, setVerificationToken] = useState<string | null>(
+    null
+  );
+  const [expiresAt, setExpiresAt] = useState<number | null>(null);
+  const [timeLeft, setTimeLeft] = useState<number | null>(null);
+  const [verifiedEmail, setVerifiedEmail] = useState<string | null>(null);
+  const [checkoutLoading, setCheckoutLoading] = useState(false);
   const [formValues, setFormValues] = useState({
     email: "",
     password: "",
@@ -48,11 +51,48 @@ export default function SignupPage() {
   });
   const [code, setCode] = useState("");
 
+  const formatTime = (ms: number) => {
+    const totalSeconds = Math.ceil(ms / 1000);
+    const minutes = Math.floor(totalSeconds / 60);
+    const seconds = totalSeconds % 60;
+    return `${minutes.toString().padStart(2, "0")}:${seconds
+      .toString()
+      .padStart(2, "0")}`;
+  };
+
+  const extractExpiry = (token?: string | null) => {
+    if (!token) return null;
+    try {
+      const [base] = token.split(".");
+      if (!base) return null;
+      const padded = base.replace(/-/g, "+").replace(/_/g, "/");
+      const json = atob(padded + "===".slice((padded.length + 3) % 4));
+      const payload = JSON.parse(json) as { exp?: number };
+      return typeof payload.exp === "number" ? payload.exp : null;
+    } catch {
+      return null;
+    }
+  };
+
+  useEffect(() => {
+    if (!expiresAt) return;
+    const tick = () => {
+      const left = Math.max(0, expiresAt - Date.now());
+      setTimeLeft(left);
+    };
+    tick();
+    const id = window.setInterval(tick, 1000);
+    return () => window.clearInterval(id);
+  }, [expiresAt]);
+
   const onSubmitDetails = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setMessage("");
+    setSentToEmail(null);
+    setExpiresAt(null);
+    setTimeLeft(null);
     if (formValues.password !== formValues.confirmPassword) {
-      setMessage("Passwords do not match.");
+      setMessage(t("signup.msg.passwordMismatch"));
       return;
     }
     try {
@@ -64,16 +104,21 @@ export default function SignupPage() {
       if (!res.ok) throw new Error();
       const data = (await res.json()) as { token?: string };
       setVerificationToken(data.token ?? null);
+      setSentToEmail(formValues.email);
+      const exp = extractExpiry(data.token ?? null);
+      setExpiresAt(exp ?? Date.now() + 2 * 60 * 1000);
       setStep("code");
-      setMessage("We sent a confirmation code to your email (placeholder).");
+      setMessage(t("signup.msg.sentCodePrefix"));
     } catch {
-      setMessage("Could not start signup. Please try again.");
+      setMessage(t("signup.msg.requestFailed"));
     }
   };
 
   const onVerifyCode = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setMessage("");
+    setSentToEmail(null);
+    setVerifiedEmail(null);
     try {
       const res = await fetch("/api/auth/signup-verify", {
         method: "POST",
@@ -81,10 +126,35 @@ export default function SignupPage() {
         body: JSON.stringify({ code, token: verificationToken, plan }),
       });
       if (!res.ok) throw new Error();
-      setMessage("Code verified. Would now redirect to Stripe Checkout.");
-      // TODO: redirect to Stripe Checkout after verification
+      setVerifiedEmail(formValues.email);
+      setStep("stripe");
+      setMessage("");
     } catch {
-      setMessage("Invalid or expired code. Please try again.");
+      setMessage(t("signup.msg.invalidCode"));
+    }
+  };
+
+  const onCheckout = async () => {
+    if (!verifiedEmail) {
+      setMessage(t("signup.msg.missingVerifiedEmail"));
+      return;
+    }
+    setCheckoutLoading(true);
+    setMessage("");
+    try {
+      const res = await fetch("/api/stripe/checkout", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ plan, email: verifiedEmail }),
+      });
+      const data = (await res.json()) as { url?: string; error?: string };
+      if (!res.ok || !data.url) {
+        throw new Error(data.error || "Checkout failed");
+      }
+      window.location.href = data.url;
+    } catch {
+      setMessage(t("signup.msg.checkoutFailed"));
+      setCheckoutLoading(false);
     }
   };
 
@@ -93,22 +163,28 @@ export default function SignupPage() {
       <div className={styles.page}>
         <div className={styles.card}>
           <div>
-            <h2 className={styles.sectionTitle}>Selected plan</h2>
-            <p className={styles.sectionSubtitle}>{planInfo.label}</p>
+            <h2 className={styles.sectionTitle}>{t("signup.selectedPlan")}</h2>
+            <p className={styles.sectionSubtitle}>{t(planInfo.labelKey)}</p>
             <div className={styles.planPrice}>
               <span>{planInfo.price}</span>
-              <span className={styles.planPeriod}>{planInfo.period}</span>
+              <span className={styles.planPeriod}>
+                {t(planInfo.periodKey)}
+              </span>
             </div>
-            <p className={styles.sectionSubtitle}>{planInfo.summary}</p>
+            <p className={`${styles.sectionSubtitle} ${styles.planSummary}`}>
+              {t(planInfo.summaryKey)}
+            </p>
           </div>
 
           <div className={styles.formCard}>
             {step === "details" ? (
               <form className={styles.form} onSubmit={onSubmitDetails}>
-                <h3 className={styles.sectionSubtitle}>Account details</h3>
+                <h3 className={styles.sectionSubtitle}>
+                  {t("signup.accountDetails")}
+                </h3>
 
                 <label className={styles.label} htmlFor="email">
-                  Email
+                  {t("signup.email")}
                 </label>
                 <input
                   id="email"
@@ -117,13 +193,16 @@ export default function SignupPage() {
                   className={styles.input}
                   value={formValues.email}
                   onChange={(e) =>
-                    setFormValues((prev) => ({ ...prev, email: e.target.value }))
+                    setFormValues((prev) => ({
+                      ...prev,
+                      email: e.target.value,
+                    }))
                   }
                   required
                 />
 
                 <label className={styles.label} htmlFor="password">
-                  Password
+                  {t("signup.password")}
                 </label>
                 <input
                   id="password"
@@ -141,7 +220,7 @@ export default function SignupPage() {
                 />
 
                 <label className={styles.label} htmlFor="confirmPassword">
-                  Confirm password
+                  {t("signup.confirmPassword")}
                 </label>
                 <input
                   id="confirmPassword"
@@ -159,7 +238,7 @@ export default function SignupPage() {
                 />
 
                 <label className={styles.label} htmlFor="venue">
-                  Venue name
+                  {t("signup.venueName")}
                 </label>
                 <input
                   id="venue"
@@ -168,21 +247,32 @@ export default function SignupPage() {
                   className={styles.input}
                   value={formValues.venue}
                   onChange={(e) =>
-                    setFormValues((prev) => ({ ...prev, venue: e.target.value }))
+                    setFormValues((prev) => ({
+                      ...prev,
+                      venue: e.target.value,
+                    }))
                   }
                   required
                 />
 
                 <button type="submit" className={styles.button}>
-                  Continue
+                  {t("signup.continue")}
                 </button>
               </form>
-            ) : (
+            ) : step === "code" ? (
               <form className={styles.form} onSubmit={onVerifyCode}>
-                <h3 className={styles.sectionSubtitle}>Enter verification code</h3>
-                <label className={styles.label} htmlFor="code">
-                  Code
-                </label>
+                <h3
+                  className={`${styles.sectionSubtitle} ${styles.codeHeading}`}
+                >
+                  {t("signup.enterCode")}
+                </h3>
+                {timeLeft !== null && (
+                  <p className={styles.codeTimer}>
+                    {timeLeft > 0
+                      ? t("signup.expiresIn", { time: formatTime(timeLeft) })
+                      : t("signup.codeExpired")}
+                  </p>
+                )}
                 <input
                   id="code"
                   name="code"
@@ -193,11 +283,39 @@ export default function SignupPage() {
                   required
                 />
                 <button type="submit" className={styles.button}>
-                  Verify code
+                  {t("signup.verifyCode")}
                 </button>
               </form>
+            ) : (
+              <div className={styles.stripeCard}>
+                <h3 className={styles.sectionSubtitle}>
+                  {t("signup.stripeTitle")}
+                </h3>
+                <p className={styles.sectionSubtitle}>
+                  {t("signup.stripeBody")}
+                </p>
+                <button
+                  type="button"
+                  className={styles.button}
+                  onClick={onCheckout}
+                  disabled={checkoutLoading}
+                >
+                  {t("signup.continueCheckout")}
+                </button>
+              </div>
             )}
-            {message && <p className={styles.note}>{message}</p>}
+            {message && (
+              <p className={styles.note}>
+                {message}
+                {sentToEmail && (
+                  <>
+                    {" "}
+                    <span className={styles.emailHighlight}>{sentToEmail}</span>
+                    {t("signup.msg.sentCodeSuffix")}
+                  </>
+                )}
+              </p>
+            )}
           </div>
         </div>
       </div>
