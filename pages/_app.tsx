@@ -5,6 +5,7 @@ import { Manrope } from "next/font/google";
 import { config } from "@fortawesome/fontawesome-svg-core";
 import { ToastProvider } from "@/lib/toast";
 import { I18nProvider } from "@/lib/i18n";
+import { Analytics } from "@vercel/analytics/react";
 
 const manrope = Manrope({
   subsets: ["latin"],
@@ -20,6 +21,7 @@ export default function App({ Component, pageProps }: AppProps) {
       <I18nProvider>
         <ToastProvider>
           <Component {...pageProps} />
+          <Analytics />
         </ToastProvider>
       </I18nProvider>
     </main>
