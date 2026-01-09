@@ -57,6 +57,12 @@ export default async function handler(
     langs: ["en", "de"],
     defaultLang: "en",
     menu: { categories: [] },
+    menuConfig: {
+      withImages: false,
+      menuBackgroundColor: "#0f172a",
+      currency: "€",
+      menuImage: "fastFood",
+    },
     createdAt: now,
   });
 

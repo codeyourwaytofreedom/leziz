@@ -1304,10 +1304,11 @@ export const getServerSideProps: GetServerSideProps<Props> = async (ctx) => {
 
   const venueName = venue.name;
 
+  const menuConfig = venue.menuConfig ?? null;
   const menu: Menu =
     venue.menu && Object.keys(venue.menu).length > 0
-      ? { ...venue.menu, menuConfig: venue.menuConfig }
-      : { categories: [], menuConfig: venue.menuConfig };
+      ? { ...venue.menu, menuConfig }
+      : { categories: [], menuConfig };
   const languages = Array.isArray(venue.langs)
     ? venue.langs
     : ["en", "tr", "de"];
@@ -1328,7 +1329,7 @@ export const getServerSideProps: GetServerSideProps<Props> = async (ctx) => {
       venueName,
       menu,
       languages,
-      menuConfig: venue.menuConfig ?? null,
+      menuConfig,
       ...(qrUrl && qrDataUrl ? { qrUrl, qrDataUrl } : {}),
     },
   };
