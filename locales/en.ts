@@ -120,6 +120,10 @@ export const en: TranslationDict = {
   "pricing.title": "Choose a plan that fits your venue",
   "pricing.subtitle":
     "Simple pricing for multilingual menus, QR sharing, and real-time updates.",
+  "pricing.free.name": "Free Test",
+  "pricing.free.period": "",
+  "pricing.free.tagline":
+    "Send us your menu and see your QR menu live. Test it for free.",
   "pricing.silver.name": "Monthly Silver",
   "pricing.silver.period": "/month",
   "pricing.silver.tagline": "Flexible basics for smaller teams.",
@@ -136,6 +140,11 @@ export const en: TranslationDict = {
   "pricing.feature.qr": "Live QR menu updates",
   "pricing.feature.editor": "Staff-friendly editor",
   "pricing.cta": "Get started",
+  "pricing.seo.title": "Leziz Pricing | QR Menus",
+  "pricing.seo.description":
+    "Choose a monthly plan for multilingual QR menus. Compare Silver and Gold plans and get started in minutes.",
+  "pricing.seo.ogDescription":
+    "Compare Silver and Gold monthly plans for multilingual QR menus.",
 
   "signup.selectedPlan": "Selected plan",
   "signup.accountDetails": "Account details",
@@ -159,6 +168,8 @@ export const en: TranslationDict = {
   "signup.msg.checkoutFailed": "Could not start checkout. Please try again.",
   "signup.loading.continue": "Sending...",
   "signup.loading.verify": "Verifying...",
+  "signup.seo.title": "Leziz Signup",
+  "signup.seo.description": "Create your Leziz account and choose a plan.",
   "signup.plan.period.month": "/month",
   "signup.plan.silver.label": "Monthly Silver",
   "signup.plan.silver.summary": "Up to 3 languages, unlimited items, QR updates.",

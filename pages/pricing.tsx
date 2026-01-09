@@ -1,4 +1,5 @@
 import { GetServerSideProps } from "next";
+import Head from "next/head";
 import Link from "next/link";
 
 import Layout from "@/layout/layout";
@@ -9,6 +10,22 @@ import { ObjectId } from "mongodb";
 import { useI18n } from "@/lib/i18n";
 
 const plans = [
+  {
+    nameKey: "pricing.free.name",
+    slug: "free-test",
+    price: "$0.00",
+    periodKey: "pricing.free.period",
+    taglineKey: "pricing.free.tagline",
+    highlightKey: "",
+    features: [
+      "pricing.feature.qr",
+      "pricing.feature.editor",
+      " ",
+      " ",
+      " ",
+      " ",
+    ],
+  },
   {
     nameKey: "pricing.silver.name",
     slug: "silver",
@@ -55,6 +72,9 @@ export default function PricingPage({
   role,
 }: PricingProps) {
   const { t } = useI18n();
+  const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || "";
+  const whatsappUrl =
+    process.env.NEXT_PUBLIC_WHATSAPP_URL || "https://wa.me/";
 
   return (
     <Layout
@@ -62,6 +82,28 @@ export default function PricingPage({
       venueName={venueName ?? undefined}
       role={role ?? undefined}
     >
+      <Head>
+        <title>{t("pricing.seo.title")}</title>
+        <meta
+          name="description"
+          content={t("pricing.seo.description")}
+        />
+        <meta property="og:title" content={t("pricing.seo.title")} />
+        <meta
+          property="og:description"
+          content={t("pricing.seo.ogDescription")}
+        />
+        <meta property="og:type" content="website" />
+        {baseUrl && (
+          <>
+            <link rel="canonical" href={`${baseUrl}/pricing`} />
+            <link rel="alternate" hrefLang="en" href={`${baseUrl}/pricing`} />
+            <link rel="alternate" hrefLang="de" href={`${baseUrl}/pricing`} />
+            <link rel="alternate" hrefLang="tr" href={`${baseUrl}/pricing`} />
+            <link rel="alternate" hrefLang="x-default" href={`${baseUrl}/pricing`} />
+          </>
+        )}
+      </Head>
       <div className={styles.page}>
         <header className={styles.header}>
           <h1 className={styles.title}>{t("pricing.title")}</h1>
@@ -69,24 +111,31 @@ export default function PricingPage({
         </header>
 
         <div className={styles.cards}>
-          {plans.map((plan) => (
-            <Link
-              key={plan.nameKey}
-              className={`${styles.card} ${
-                plan.slug === "silver" ? styles.cardSilver : styles.cardGold
-              }`}
-              href={`/signup?plan=${plan.slug}`}
-            >
+          {plans.map((plan) => {
+            const isFree = plan.slug === "free-test";
+            const cardClass = `${styles.card} ${
+              plan.slug === "silver"
+                ? styles.cardSilver
+                : plan.slug === "gold"
+                ? styles.cardGold
+                : styles.cardFree
+            }`;
+            const cardBody = (
               <div className={styles.cardTop}>
                 <p className={styles.planName}>{t(plan.nameKey)}</p>
                 <div className={styles.priceRow}>
                   <span className={styles.price}>{plan.price}</span>
                   <span className={styles.period}>{t(plan.periodKey)}</span>
                 </div>
+                {plan.taglineKey && (
+                  <p className={styles.tagline}>{t(plan.taglineKey)}</p>
+                )}
                 {plan.highlightKey && (
                   <span className={styles.badge}>{t(plan.highlightKey)}</span>
                 )}
               </div>
+            );
+            const cardFooter = (
               <div className={styles.cardBody}>
                 <ul className={styles.features}>
                   {plan.features.map((featKey, idx) =>
@@ -99,8 +148,30 @@ export default function PricingPage({
                 </ul>
                 <span className={styles.cta}>{t("pricing.cta")}</span>
               </div>
-            </Link>
-          ))}
+            );
+
+            return isFree ? (
+              <a
+                key={plan.nameKey}
+                className={cardClass}
+                href={whatsappUrl}
+                target="_blank"
+                rel="noreferrer"
+              >
+                {cardBody}
+                {cardFooter}
+              </a>
+            ) : (
+              <Link
+                key={plan.nameKey}
+                className={cardClass}
+                href={`/signup?plan=${plan.slug}`}
+              >
+                {cardBody}
+                {cardFooter}
+              </Link>
+            );
+          })}
         </div>
       </div>
     </Layout>

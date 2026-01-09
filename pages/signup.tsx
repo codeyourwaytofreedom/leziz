@@ -1,10 +1,12 @@
 import { FormEvent, useEffect, useState } from "react";
 import { useRouter } from "next/router";
 import { GetServerSideProps } from "next";
+import Head from "next/head";
 import Layout from "@/layout/layout";
 import styles from "@/styles/signup.module.scss";
 import { getSession } from "@/lib/session";
 import { useI18n } from "@/lib/i18n";
+import { useToast } from "@/lib/toast";
 import LoadingButton from "@/components/LoadingButton";
 
 type PlanInfo = {
@@ -32,6 +34,7 @@ const planDetails: Record<string, PlanInfo> = {
 export default function SignupPage() {
   const router = useRouter();
   const { t } = useI18n();
+  const toast = useToast();
   const plan = (router.query.plan as string) || "silver";
   const planInfo = planDetails[plan] ?? planDetails.silver;
   const [message, setMessage] = useState("");
@@ -95,7 +98,9 @@ export default function SignupPage() {
     setTimeLeft(null);
     setDetailsLoading(true);
     if (formValues.password !== formValues.confirmPassword) {
-      setMessage(t("signup.msg.passwordMismatch"));
+      const msg = t("signup.msg.passwordMismatch");
+      setMessage(msg);
+      toast.addToast(msg, "error");
       setDetailsLoading(false);
       return;
     }
@@ -114,7 +119,9 @@ export default function SignupPage() {
       setStep("code");
       setMessage(t("signup.msg.sentCode"));
     } catch {
-      setMessage(t("signup.msg.requestFailed"));
+      const msg = t("signup.msg.requestFailed");
+      setMessage(msg);
+      toast.addToast(msg, "error");
     } finally {
       setDetailsLoading(false);
     }
@@ -130,24 +137,48 @@ export default function SignupPage() {
       const res = await fetch("/api/auth/signup-verify", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ code, token: verificationToken, plan }),
+        body: JSON.stringify({
+          code,
+          token: verificationToken,
+          plan,
+          password: formValues.password,
+        }),
       });
-      if (!res.ok) throw new Error("verify");
+      if (!res.ok) {
+        let serverMessage = "";
+        try {
+          const data = (await res.json()) as { error?: string };
+          serverMessage = data.error ?? "";
+        } catch {
+          serverMessage = "";
+        }
+        throw new Error(serverMessage || "verify");
+      }
       const checkoutRes = await fetch("/api/stripe/checkout", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ plan, email: formValues.email }),
       });
-      const data = (await checkoutRes.json()) as { url?: string; error?: string };
-      if (!checkoutRes.ok || !data.url) {
-        throw new Error(data.error || "Checkout failed");
+      const checkoutData = (await checkoutRes.json()) as {
+        url?: string;
+        error?: string;
+      };
+      if (!checkoutRes.ok || !checkoutData.url) {
+        throw new Error(checkoutData.error || "Checkout failed");
       }
-      window.location.href = data.url;
+      window.location.href = checkoutData.url;
     } catch (err) {
       if (err instanceof Error && err.message === "verify") {
-        setMessage(t("signup.msg.invalidCode"));
+        const msg = t("signup.msg.invalidCode");
+        setMessage(msg);
+        toast.addToast(msg, "error");
+      } else if (err instanceof Error && err.message) {
+        setMessage(err.message);
+        toast.addToast(err.message, "error");
       } else {
-        setMessage(t("signup.msg.checkoutFailed"));
+        const msg = t("signup.msg.checkoutFailed");
+        setMessage(msg);
+        toast.addToast(msg, "error");
       }
       setVerifyLoading(false);
     }
@@ -155,6 +186,11 @@ export default function SignupPage() {
 
   return (
     <Layout>
+      <Head>
+        <title>{t("signup.seo.title")}</title>
+        <meta name="description" content={t("signup.seo.description")} />
+        <meta name="robots" content="noindex, nofollow" />
+      </Head>
       <div className={styles.page}>
         <div className={styles.card}>
           <div>

@@ -119,6 +119,10 @@ export const tr: TranslationDict = {
   "pricing.title": "Mekânınıza uygun planı seçin",
   "pricing.subtitle":
     "Çok dilli menüler, QR paylaşımı ve anlık güncellemeler için sade fiyatlandırma.",
+  "pricing.free.name": "Ücretsiz Test",
+  "pricing.free.period": "",
+  "pricing.free.tagline":
+    "Menünüzü bize gönderin ve QR menünüzü canlı görün. Ücretsiz test edin.",
   "pricing.silver.name": "Aylık Silver",
   "pricing.silver.period": "/ay",
   "pricing.silver.tagline": "Küçük ekipler için esnek temel özellikler.",
@@ -135,6 +139,11 @@ export const tr: TranslationDict = {
   "pricing.feature.qr": "Canlı QR menü güncellemeleri",
   "pricing.feature.editor": "Personel dostu editör",
   "pricing.cta": "Başla",
+  "pricing.seo.title": "Leziz Fiyatlandırma | QR Menüler",
+  "pricing.seo.description":
+    "Çok dilli QR menüler için aylık plan seçin. Silver ve Gold planlarını karşılaştırın ve dakikalar içinde başlayın.",
+  "pricing.seo.ogDescription":
+    "Çok dilli QR menüler için aylık Silver ve Gold planlarını karşılaştırın.",
 
   // Signup
   "signup.selectedPlan": "Seçilen plan",
@@ -159,6 +168,8 @@ export const tr: TranslationDict = {
   "signup.msg.checkoutFailed": "Ödeme başlatılamadı. Lütfen tekrar deneyin.",
   "signup.loading.continue": "Gönderiliyor...",
   "signup.loading.verify": "Doğrulanıyor...",
+  "signup.seo.title": "Leziz Kayıt",
+  "signup.seo.description": "Leziz hesabınızı oluşturun ve plan seçin.",
   "signup.plan.period.month": "/ay",
   "signup.plan.silver.label": "Aylık Silver",
   "signup.plan.silver.summary": "3 dile kadar, sınırsız ürün, QR güncellemeleri.",

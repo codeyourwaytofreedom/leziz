@@ -97,6 +97,10 @@
   color: var(--color-text);
 }
 
+.sentCodeMessage {
+  display: inline;
+}
+
 .stripeCard {
   display: grid;
   gap: 0.75rem;

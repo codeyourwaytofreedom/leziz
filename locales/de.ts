@@ -120,6 +120,10 @@ export const de: TranslationDict = {
   "pricing.title": "Wählen Sie den passenden Tarif",
   "pricing.subtitle":
     "Einfache Preise für mehrsprachige Menüs, QR-Sharing und Live-Updates.",
+  "pricing.free.name": "Gratis Test",
+  "pricing.free.period": "",
+  "pricing.free.tagline":
+    "Senden Sie uns Ihr Menü und sehen Sie Ihr QR-Menü live. Testen Sie es kostenlos.",
   "pricing.silver.name": "Monatlich Silber",
   "pricing.silver.period": "/Monat",
   "pricing.silver.tagline": "Flexible Basics für kleinere Teams.",
@@ -136,6 +140,11 @@ export const de: TranslationDict = {
   "pricing.feature.qr": "Live-QR-Menü-Updates",
   "pricing.feature.editor": "Servicefreundlicher Editor",
   "pricing.cta": "Jetzt starten",
+  "pricing.seo.title": "Leziz Preise | QR-Menüs",
+  "pricing.seo.description":
+    "Wählen Sie einen monatlichen Plan für mehrsprachige QR-Menüs. Vergleichen Sie Silver und Gold und starten Sie in Minuten.",
+  "pricing.seo.ogDescription":
+    "Vergleichen Sie monatliche Silver- und Gold-Pläne für mehrsprachige QR-Menüs.",
 
   "signup.selectedPlan": "Ausgewählter Tarif",
   "signup.accountDetails": "Kontodetails",
@@ -159,6 +168,8 @@ export const de: TranslationDict = {
   "signup.msg.checkoutFailed": "Checkout konnte nicht gestartet werden. Bitte erneut versuchen.",
   "signup.loading.continue": "Wird gesendet...",
   "signup.loading.verify": "Wird geprüft...",
+  "signup.seo.title": "Leziz Registrierung",
+  "signup.seo.description": "Erstellen Sie Ihr Leziz-Konto und wählen Sie einen Plan.",
   "signup.plan.period.month": "/Monat",
   "signup.plan.silver.label": "Monatlich Silber",
   "signup.plan.silver.summary": "Bis zu 3 Sprachen, unbegrenzte Artikel, QR-Updates.",

@@ -15,6 +15,7 @@ import { TranslationDict } from "@/locales/types";
 type Locale = "en" | "de" | "tr";
 
 const translations: Record<Locale, TranslationDict> = { en, de, tr };
+const supportedLocales: Locale[] = ["en", "de", "tr"];
 
 const I18nContext = createContext<{
   locale: Locale;
@@ -33,21 +34,41 @@ function format(text: string, params?: Record<string, string>) {
   }, text);
 }
 
+function pickBrowserLocale(): Locale {
+  if (typeof window === "undefined") return "en";
+  const candidates =
+    window.navigator.languages && window.navigator.languages.length > 0
+      ? window.navigator.languages
+      : [window.navigator.language];
+  for (const candidate of candidates) {
+    if (!candidate) continue;
+    const code = candidate.toLowerCase().split("-")[0];
+    if (supportedLocales.includes(code as Locale)) {
+      return code as Locale;
+    }
+  }
+  return "en";
+}
+
 export function I18nProvider({ children }: { children: React.ReactNode }) {
   const [locale, setLocaleState] = useState<Locale>("en");
 
   useEffect(() => {
     if (typeof window === "undefined") return;
     const saved = window.localStorage.getItem("locale") as Locale | null;
-    if (saved && (saved === "en" || saved === "de" || saved === "tr")) {
+    if (saved && supportedLocales.includes(saved)) {
       // eslint-disable-next-line react-hooks/set-state-in-effect
       setLocaleState(saved);
       return;
     }
-    const browser = window.navigator.language.slice(0, 2);
     // eslint-disable-next-line react-hooks/set-state-in-effect
-    setLocaleState(browser === "de" ? "de" : browser === "tr" ? "tr" : "en");
+    setLocaleState(pickBrowserLocale());
   }, []);
+
+  useEffect(() => {
+    if (typeof document === "undefined") return;
+    document.documentElement.lang = locale;
+  }, [locale]);
 
   const setLocale = useCallback((next: Locale) => {
     setLocaleState(next);
