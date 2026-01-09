@@ -40,6 +40,12 @@ export const en: TranslationDict = {
   "home.section.gallery.title": "Built for dining rooms and patios",
   "home.section.gallery.subtitle":
     "From cozy bistros to lively pubs, deliver a consistent digital menu that feels premium and personal.",
+  "home.seo.title": "Leziz | Multilingual QR Menus for Restaurants",
+  "home.seo.description":
+    "Create, translate, and share your restaurant menu in minutes. Keep prices fresh, share one QR code, and serve guests in their language.",
+  "home.seo.ogTitle": "Leziz | Multilingual QR Menus for Restaurants",
+  "home.seo.ogDescription":
+    "Build and update digital menus with translations, QR sharing, and instant pricing changes.",
   "home.offers.title": "Ready to save on Leziz?",
   "home.offers.subtitle":
     "See monthly plans designed for growing venues.",
@@ -80,6 +86,8 @@ export const en: TranslationDict = {
   "owner.modal.category.renameTitle": "Rename category",
   "owner.modal.item.addTitle": "Add item",
   "owner.modal.item.editTitle": "Edit item",
+  "owner.item.fallback": "Item",
+  "owner.ingredients.placeholder": "e.g. tomato, basil, mozzarella",
   "owner.empty.start": "Start your menu",
   "owner.empty.cta": "Add your first category",
   "owner.selectMenuImage": "Select menu image",
@@ -87,6 +95,9 @@ export const en: TranslationDict = {
   // QR
   "owner.qr.alt": "Menu QR code",
   "owner.qr.altLarge": "Menu QR code large",
+  "owner.toast.saved": "Saved",
+  "owner.toast.saveError": "Error saving menu",
+  "owner.toast.invalidPayload": "Could not save. Please try again.",
 
   // Bigboss
   "bigboss.subtitle":
@@ -101,6 +112,13 @@ export const en: TranslationDict = {
   "bigboss.creating": "Creating...",
   "bigboss.toast.ownerRequired": "Owner email and password are required",
   "bigboss.toast.passwordShort": "Password must be at least 6 characters",
+  "bigboss.toast.unauthorized": "You are not authorized to perform this action.",
+  "bigboss.toast.invalidVenueName": "Please enter a valid venue name.",
+  "bigboss.toast.invalidEmail": "Please enter a valid email address.",
+  "bigboss.toast.passwordWeak":
+    "Password must be at least 8 characters and include upper, lower, and a number.",
+  "bigboss.toast.invalidVenueId": "Please provide a valid venue ID.",
+  "bigboss.toast.emailExists": "This email is already registered.",
   "bigboss.toast.venueError": "Error creating venue",
   "bigboss.toast.venueSuccess": "Venue created",
   "bigboss.toast.userError": "Venue saved, user creation failed",
@@ -145,6 +163,11 @@ export const en: TranslationDict = {
     "Choose a monthly plan for multilingual QR menus. Compare Silver and Gold plans and get started in minutes.",
   "pricing.seo.ogDescription":
     "Compare Silver and Gold monthly plans for multilingual QR menus.",
+  "checkout.success.title": "Payment successful",
+  "checkout.success.body": "Your subscription is active. You can now manage your menu.",
+  "menu.ingredients.label": "Ingredients",
+  "menu.header.alt": "Menu header",
+  "menu.empty": "No menu items available yet.",
 
   "signup.selectedPlan": "Selected plan",
   "signup.accountDetails": "Account details",
@@ -161,8 +184,17 @@ export const en: TranslationDict = {
   "signup.stripeBody": "Your email is verified. Continue to payment to activate your plan.",
   "signup.continueCheckout": "Continue to checkout",
   "signup.msg.passwordMismatch": "Passwords do not match.",
+  "signup.msg.passwordWeak":
+    "Password must be at least 8 characters and include upper, lower, and a number.",
   "signup.msg.sentCode": "We sent a confirmation code to {email}.",
   "signup.msg.requestFailed": "Could not start signup. Please try again.",
+  "signup.msg.missingFields": "Please fill in all required fields.",
+  "signup.msg.emailNotConfigured": "Email service is not configured yet.",
+  "signup.msg.emailSendFailed": "Could not send the verification email.",
+  "signup.msg.invalidEmail": "Please enter a valid email address.",
+  "signup.msg.invalidVenue": "Please enter a valid venue name.",
+  "signup.msg.emailExists": "This email is already registered.",
+  "signup.msg.invalidPlan": "Please choose a valid plan.",
   "signup.msg.invalidCode": "Invalid or expired code. Please try again.",
   "signup.msg.missingVerifiedEmail": "Missing verified email. Please re-verify.",
   "signup.msg.checkoutFailed": "Could not start checkout. Please try again.",

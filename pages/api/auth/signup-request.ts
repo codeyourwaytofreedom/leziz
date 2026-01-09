@@ -10,7 +10,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
   const { email, password, plan, venue } = req.body || {};
   if (!email || !password || !venue || !plan) {
-    return res.status(400).json({ error: "Missing required fields" });
+    return res.status(400).json({ error: "MISSING_FIELDS" });
   }
 
   const gmailUser = process.env.MAIL;
@@ -18,7 +18,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   const from = gmailUser;
 
   if (!gmailUser || !gmailPass) {
-    return res.status(500).json({ error: "Email is not configured" });
+    return res.status(500).json({ error: "EMAIL_NOT_CONFIGURED" });
   }
 
   const code = Math.floor(100000 + Math.random() * 900000).toString();
@@ -55,6 +55,6 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     return res.status(200).json({ token });
   } catch (err) {
     console.error("Signup email failed", err);
-    return res.status(500).json({ error: "Could not send email" });
+    return res.status(500).json({ error: "EMAIL_SEND_FAILED" });
   }
 }

@@ -16,13 +16,13 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
   const secret = process.env.STRIPE_WEBHOOK_SECRET;
   if (!secret) {
-    return res.status(500).json({ error: "Missing STRIPE_WEBHOOK_SECRET" });
+    return res.status(500).json({ error: "MISSING_WEBHOOK_SECRET" });
   }
 
   const stripe = getStripeClient();
   const sig = req.headers["stripe-signature"];
   if (!sig || Array.isArray(sig)) {
-    return res.status(400).json({ error: "Missing Stripe signature" });
+    return res.status(400).json({ error: "MISSING_SIGNATURE" });
   }
 
   let event;
@@ -31,7 +31,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     event = stripe.webhooks.constructEvent(rawBody, sig, secret);
   } catch (err) {
     console.error("Stripe webhook signature error", err);
-    return res.status(400).json({ error: "Invalid signature" });
+    return res.status(400).json({ error: "INVALID_SIGNATURE" });
   }
 
   switch (event.type) {

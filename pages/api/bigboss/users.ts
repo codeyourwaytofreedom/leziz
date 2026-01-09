@@ -13,7 +13,7 @@ export default async function handler(
 
   const session = getSession(req);
   if (!session || session.role !== "bigboss") {
-    return res.status(401).json({ error: "Unauthorized" });
+    return res.status(401).json({ error: "UNAUTHORIZED" });
   }
 
   const { email, password, venueId } = req.body as {
@@ -27,17 +27,21 @@ export default async function handler(
     !normalizedEmail ||
     !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(normalizedEmail)
   ) {
-    return res.status(400).json({ error: "Valid email is required" });
+    return res.status(400).json({ error: "INVALID_EMAIL" });
   }
 
-  if (!password || password.length < 6) {
-    return res
-      .status(400)
-      .json({ error: "Password must be at least 6 characters" });
+  const passwordOk =
+    typeof password === "string" &&
+    password.length >= 8 &&
+    /[a-z]/.test(password) &&
+    /[A-Z]/.test(password) &&
+    /\d/.test(password);
+  if (!passwordOk) {
+    return res.status(400).json({ error: "WEAK_PASSWORD" });
   }
 
   if (!venueId || !ObjectId.isValid(venueId)) {
-    return res.status(400).json({ error: "Valid venueId is required" });
+    return res.status(400).json({ error: "INVALID_VENUE_ID" });
   }
 
   const db = await getDb();
@@ -46,7 +50,7 @@ export default async function handler(
     .collection("users")
     .findOne({ email: normalizedEmail });
   if (existing) {
-    return res.status(409).json({ error: "Email already exists" });
+    return res.status(409).json({ error: "EMAIL_EXISTS" });
   }
 
   const passwordHash = await bcrypt.hash(password, 10);

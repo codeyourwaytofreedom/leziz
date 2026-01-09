@@ -39,6 +39,12 @@ export const de: TranslationDict = {
   "home.section.gallery.title": "Für Gastraum und Terrasse",
   "home.section.gallery.subtitle":
     "Von gemütlichen Bistros bis lebhaften Pubs – liefern Sie ein konsistentes digitales Menü, das hochwertig wirkt.",
+  "home.seo.title": "Leziz | Mehrsprachige QR-Menüs für Restaurants",
+  "home.seo.description":
+    "Erstellen, übersetzen und teilen Sie Ihre Speisekarte in wenigen Minuten. Halten Sie Preise aktuell, teilen Sie einen QR-Code und bedienen Sie Gäste in ihrer Sprache.",
+  "home.seo.ogTitle": "Leziz | Mehrsprachige QR-Menüs für Restaurants",
+  "home.seo.ogDescription":
+    "Digitale Menüs mit Übersetzungen, QR-Teilen und sofortigen Preisupdates erstellen und aktualisieren.",
   "home.offers.title": "Bereit zu sparen mit Leziz?",
   "home.offers.subtitle":
     "Monatliche Pläne für wachsende Teams entdecken.",
@@ -79,12 +85,17 @@ export const de: TranslationDict = {
   "owner.modal.category.renameTitle": "Kategorie umbenennen",
   "owner.modal.item.addTitle": "Artikel hinzufügen",
   "owner.modal.item.editTitle": "Artikel bearbeiten",
+  "owner.item.fallback": "Artikel",
+  "owner.ingredients.placeholder": "z. B. Tomate, Basilikum, Mozzarella",
   "owner.empty.start": "Starten Sie Ihre Speisekarte",
   "owner.empty.cta": "Fügen Sie Ihre erste Kategorie hinzu",
   "owner.selectMenuImage": "Menübild auswählen",
 
   "owner.qr.alt": "Speisekarten-QR-Code",
   "owner.qr.altLarge": "Großer Speisekarten-QR-Code",
+  "owner.toast.saved": "Gespeichert",
+  "owner.toast.saveError": "Fehler beim Speichern des Menüs",
+  "owner.toast.invalidPayload": "Speichern fehlgeschlagen. Bitte erneut versuchen.",
 
   // Bigboss
   "bigboss.subtitle":
@@ -101,6 +112,17 @@ export const de: TranslationDict = {
     "E-Mail und Passwort des Besitzers sind erforderlich",
   "bigboss.toast.passwordShort":
     "Das Passwort muss mindestens 6 Zeichen haben",
+  "bigboss.toast.unauthorized":
+    "Sie sind nicht berechtigt, diese Aktion auszuführen.",
+  "bigboss.toast.invalidVenueName":
+    "Bitte einen gültigen Restaurantnamen eingeben.",
+  "bigboss.toast.invalidEmail":
+    "Bitte eine gültige E-Mail-Adresse eingeben.",
+  "bigboss.toast.passwordWeak":
+    "Das Passwort muss mindestens 8 Zeichen enthalten und Groß-, Kleinbuchstaben sowie eine Zahl umfassen.",
+  "bigboss.toast.invalidVenueId":
+    "Bitte eine gültige Venue-ID angeben.",
+  "bigboss.toast.emailExists": "Diese E-Mail ist bereits registriert.",
   "bigboss.toast.venueError": "Fehler beim Anlegen des Restaurants",
   "bigboss.toast.venueSuccess": "Restaurant angelegt",
   "bigboss.toast.userError": "Restaurant gespeichert, Benutzer fehlgeschlagen",
@@ -145,6 +167,11 @@ export const de: TranslationDict = {
     "Wählen Sie einen monatlichen Plan für mehrsprachige QR-Menüs. Vergleichen Sie Silver und Gold und starten Sie in Minuten.",
   "pricing.seo.ogDescription":
     "Vergleichen Sie monatliche Silver- und Gold-Pläne für mehrsprachige QR-Menüs.",
+  "checkout.success.title": "Zahlung erfolgreich",
+  "checkout.success.body": "Ihr Abonnement ist aktiv. Sie können jetzt Ihr Menü verwalten.",
+  "menu.ingredients.label": "Zutaten",
+  "menu.header.alt": "Menü-Header",
+  "menu.empty": "Noch keine Menüpunkte vorhanden.",
 
   "signup.selectedPlan": "Ausgewählter Tarif",
   "signup.accountDetails": "Kontodetails",
@@ -161,8 +188,17 @@ export const de: TranslationDict = {
   "signup.stripeBody": "Ihre E-Mail ist verifiziert. Weiter zur Zahlung, um Ihren Tarif zu aktivieren.",
   "signup.continueCheckout": "Weiter zur Kasse",
   "signup.msg.passwordMismatch": "Passwörter stimmen nicht überein.",
+  "signup.msg.passwordWeak":
+    "Das Passwort muss mindestens 8 Zeichen enthalten und Groß-, Kleinbuchstaben sowie eine Zahl umfassen.",
   "signup.msg.sentCode": "Wir haben einen Bestätigungscode an {email} gesendet.",
   "signup.msg.requestFailed": "Anmeldung konnte nicht gestartet werden. Bitte erneut versuchen.",
+  "signup.msg.missingFields": "Bitte alle Pflichtfelder ausfüllen.",
+  "signup.msg.emailNotConfigured": "Der E-Mail-Dienst ist noch nicht konfiguriert.",
+  "signup.msg.emailSendFailed": "Die Bestätigungs-E-Mail konnte nicht gesendet werden.",
+  "signup.msg.invalidEmail": "Bitte eine gültige E-Mail-Adresse eingeben.",
+  "signup.msg.invalidVenue": "Bitte einen gültigen Restaurantnamen eingeben.",
+  "signup.msg.emailExists": "Diese E-Mail ist bereits registriert.",
+  "signup.msg.invalidPlan": "Bitte einen gültigen Plan auswählen.",
   "signup.msg.invalidCode": "Ungültiger oder abgelaufener Code. Bitte erneut versuchen.",
   "signup.msg.missingVerifiedEmail": "Verifizierte E-Mail fehlt. Bitte erneut verifizieren.",
   "signup.msg.checkoutFailed": "Checkout konnte nicht gestartet werden. Bitte erneut versuchen.",

@@ -53,7 +53,21 @@ export default function BigBossPage() {
       });
 
       if (!res.ok) {
-        toast.addToast(t("bigboss.toast.venueError"), "error");
+        let serverError = "";
+        try {
+          const data = (await res.json()) as { error?: string };
+          serverError = data.error ?? "";
+        } catch {
+          serverError = "";
+        }
+        const errorKeyMap: Record<string, string> = {
+          UNAUTHORIZED: "bigboss.toast.unauthorized",
+          INVALID_NAME: "bigboss.toast.invalidVenueName",
+        };
+        const msg = errorKeyMap[serverError]
+          ? t(errorKeyMap[serverError])
+          : t("bigboss.toast.venueError");
+        toast.addToast(msg, "error");
         return;
       }
       const data = (await res.json()) as { venueId: string; token: string };
@@ -74,7 +88,24 @@ export default function BigBossPage() {
         }),
       });
       if (!userRes.ok) {
-        toast.addToast(t("bigboss.toast.userError"), "error");
+        let serverError = "";
+        try {
+          const data = (await userRes.json()) as { error?: string };
+          serverError = data.error ?? "";
+        } catch {
+          serverError = "";
+        }
+        const errorKeyMap: Record<string, string> = {
+          UNAUTHORIZED: "bigboss.toast.unauthorized",
+          INVALID_EMAIL: "bigboss.toast.invalidEmail",
+          WEAK_PASSWORD: "bigboss.toast.passwordWeak",
+          INVALID_VENUE_ID: "bigboss.toast.invalidVenueId",
+          EMAIL_EXISTS: "bigboss.toast.emailExists",
+        };
+        const msg = errorKeyMap[serverError]
+          ? t(errorKeyMap[serverError])
+          : t("bigboss.toast.userError");
+        toast.addToast(msg, "error");
       } else {
         setCreatedOwnerEmail(ownerEmail.trim());
         toast.addToast(t("bigboss.toast.userSuccess"), "success");

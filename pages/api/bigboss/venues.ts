@@ -12,7 +12,7 @@ export default async function handler(
 
   const session = getSession(req);
   if (!session || session.role !== "bigboss") {
-    return res.status(401).json({ error: "Unauthorized" });
+    return res.status(401).json({ error: "UNAUTHORIZED" });
   }
 
   const { name, languages, defaultLang } = req.body as {
@@ -22,7 +22,7 @@ export default async function handler(
   };
 
   if (!name || typeof name !== "string" || !name.trim()) {
-    return res.status(400).json({ error: "Name is required" });
+    return res.status(400).json({ error: "INVALID_NAME" });
   }
 
   const langsRaw =

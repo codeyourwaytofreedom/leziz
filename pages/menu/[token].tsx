@@ -3,6 +3,7 @@ import { GetServerSideProps } from "next";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { ObjectId } from "mongodb";
 import { getDb } from "@/lib/mongodb";
+import { useI18n } from "@/lib/i18n";
 import styles from "@/styles/publicMenu.module.scss";
 import { LocalizedText, Menu } from "@/types/menu";
 import logo from "@/assets/lzz.png";
@@ -61,6 +62,7 @@ export default function MenuPage({
         : (["en", "tr", "de"] as Language[]),
     [providedLanguages]
   );
+  const { t } = useI18n();
   const [language, setLanguage] = useState<Language>(() => languages[0] ?? "en");
   const [langOpen, setLangOpen] = useState(false);
   const langRef = useRef<HTMLDivElement | null>(null);
@@ -72,11 +74,7 @@ export default function MenuPage({
   );
   const currencySymbol = currency || "€";
 
-  const ingredientsLabel = {
-    en: "Ingredients",
-    tr: "Malzemeler",
-    de: "Zutaten",
-  }[language];
+  const ingredientsLabel = t("menu.ingredients.label");
 
   const bgColor = menuBackgroundColor || "#0f172a";
   const headerMap: Record<string, StaticImageData> = {
@@ -147,7 +145,7 @@ export default function MenuPage({
               <div className={styles.redBanner} aria-hidden="true">
                 <Image
                   src={headerImg}
-                  alt="Menu header"
+                  alt={t("menu.header.alt")}
                   fill
                   sizes="780px"
                   className={styles.redBannerImage}
@@ -284,7 +282,7 @@ export default function MenuPage({
 
               {menu.categories.length === 0 && (
                 <div className={styles.section}>
-                  <p>No menu items available yet.</p>
+                  <p>{t("menu.empty")}</p>
                 </div>
               )}
             </div>

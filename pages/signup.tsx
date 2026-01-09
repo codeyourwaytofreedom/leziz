@@ -97,6 +97,18 @@ export default function SignupPage() {
     setExpiresAt(null);
     setTimeLeft(null);
     setDetailsLoading(true);
+    const passwordOk =
+      formValues.password.length >= 8 &&
+      /[a-z]/.test(formValues.password) &&
+      /[A-Z]/.test(formValues.password) &&
+      /\d/.test(formValues.password);
+    if (!passwordOk) {
+      const msg = t("signup.msg.passwordWeak");
+      setMessage(msg);
+      toast.addToast(msg, "error");
+      setDetailsLoading(false);
+      return;
+    }
     if (formValues.password !== formValues.confirmPassword) {
       const msg = t("signup.msg.passwordMismatch");
       setMessage(msg);
@@ -110,7 +122,16 @@ export default function SignupPage() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ ...formValues, plan }),
       });
-      if (!res.ok) throw new Error();
+      if (!res.ok) {
+        let serverError = "";
+        try {
+          const data = (await res.json()) as { error?: string };
+          serverError = data.error ?? "";
+        } catch {
+          serverError = "";
+        }
+        throw new Error(serverError || "request");
+      }
       const data = (await res.json()) as { token?: string };
       setVerificationToken(data.token ?? null);
       setSentToEmail(formValues.email);
@@ -118,10 +139,23 @@ export default function SignupPage() {
       setExpiresAt(exp ?? Date.now() + 2 * 60 * 1000);
       setStep("code");
       setMessage(t("signup.msg.sentCode"));
-    } catch {
-      const msg = t("signup.msg.requestFailed");
-      setMessage(msg);
-      toast.addToast(msg, "error");
+    } catch (err) {
+      if (err instanceof Error) {
+        const errorKeyMap: Record<string, string> = {
+          MISSING_FIELDS: "signup.msg.missingFields",
+          EMAIL_NOT_CONFIGURED: "signup.msg.emailNotConfigured",
+          EMAIL_SEND_FAILED: "signup.msg.emailSendFailed",
+          request: "signup.msg.requestFailed",
+        };
+        const mappedKey = errorKeyMap[err.message];
+        const msg = mappedKey ? t(mappedKey) : t("signup.msg.requestFailed");
+        setMessage(msg);
+        toast.addToast(msg, "error");
+      } else {
+        const msg = t("signup.msg.requestFailed");
+        setMessage(msg);
+        toast.addToast(msg, "error");
+      }
     } finally {
       setDetailsLoading(false);
     }
@@ -145,14 +179,14 @@ export default function SignupPage() {
         }),
       });
       if (!res.ok) {
-        let serverMessage = "";
+        let serverError = "";
         try {
           const data = (await res.json()) as { error?: string };
-          serverMessage = data.error ?? "";
+          serverError = data.error ?? "";
         } catch {
-          serverMessage = "";
+          serverError = "";
         }
-        throw new Error(serverMessage || "verify");
+        throw new Error(serverError || "verify");
       }
       const checkoutRes = await fetch("/api/stripe/checkout", {
         method: "POST",
@@ -164,17 +198,29 @@ export default function SignupPage() {
         error?: string;
       };
       if (!checkoutRes.ok || !checkoutData.url) {
-        throw new Error(checkoutData.error || "Checkout failed");
+        throw new Error(checkoutData.error || "checkout");
       }
       window.location.href = checkoutData.url;
     } catch (err) {
-      if (err instanceof Error && err.message === "verify") {
-        const msg = t("signup.msg.invalidCode");
+      if (err instanceof Error) {
+        const errorKeyMap: Record<string, string> = {
+          MISSING_FIELDS: "signup.msg.missingFields",
+          INVALID_TOKEN: "signup.msg.invalidCode",
+          INCORRECT_CODE: "signup.msg.invalidCode",
+          INVALID_EMAIL: "signup.msg.invalidEmail",
+          INVALID_VENUE: "signup.msg.invalidVenue",
+          WEAK_PASSWORD: "signup.msg.passwordWeak",
+          EMAIL_EXISTS: "signup.msg.emailExists",
+          verify: "signup.msg.invalidCode",
+          INVALID_PLAN: "signup.msg.invalidPlan",
+          MISSING_CHECKOUT_URL: "signup.msg.checkoutFailed",
+          CHECKOUT_SESSION_CREATE_FAILED: "signup.msg.checkoutFailed",
+          checkout: "signup.msg.checkoutFailed",
+        };
+        const mappedKey = errorKeyMap[err.message];
+        const msg = mappedKey ? t(mappedKey) : t("signup.msg.checkoutFailed");
         setMessage(msg);
         toast.addToast(msg, "error");
-      } else if (err instanceof Error && err.message) {
-        setMessage(err.message);
-        toast.addToast(err.message, "error");
       } else {
         const msg = t("signup.msg.checkoutFailed");
         setMessage(msg);

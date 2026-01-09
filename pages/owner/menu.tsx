@@ -657,11 +657,30 @@ export default function OwnerMenuPage({
           },
         }),
       });
-      if (!res.ok) throw new Error(await res.text());
-      toast.addToast("Saved", "success");
+      if (!res.ok) {
+        let serverError = "";
+        try {
+          const data = (await res.json()) as { error?: string };
+          serverError = data.error ?? "";
+        } catch {
+          serverError = "";
+        }
+        throw new Error(serverError || "save");
+      }
+      toast.addToast(t("owner.toast.saved"), "success");
       setHasChanges(false);
-    } catch {
-      toast.addToast("Error saving menu", "error");
+    } catch (err) {
+      if (err instanceof Error) {
+        const errorKeyMap: Record<string, string> = {
+          INVALID_PAYLOAD: "owner.toast.invalidPayload",
+          save: "owner.toast.saveError",
+        };
+        const mappedKey = errorKeyMap[err.message];
+        const msg = mappedKey ? t(mappedKey) : t("owner.toast.saveError");
+        toast.addToast(msg, "error");
+      } else {
+        toast.addToast(t("owner.toast.saveError"), "error");
+      }
     }
   }
 
@@ -851,7 +870,7 @@ export default function OwnerMenuPage({
                   setDeleteTarget({
                     catId: c.id,
                     itemId,
-                    name: resolveText(item?.name, language) || "Item",
+                    name: resolveText(item?.name, language) || t("owner.item.fallback"),
                   });
                 }}
                 highlightItemId={
@@ -1040,7 +1059,7 @@ export default function OwnerMenuPage({
               }
               className={styles.modalInput}
               rows={2}
-              placeholder="e.g. tomato, basil, mozzarella"
+              placeholder={t("owner.ingredients.placeholder")}
             />
           </label>
           <div className={styles.modalActions}>
@@ -1148,7 +1167,7 @@ export default function OwnerMenuPage({
               }
               className={styles.modalInput}
               rows={2}
-              placeholder="e.g. tomato, basil, mozzarella"
+              placeholder={t("owner.ingredients.placeholder")}
             />
           </label>
           <div className={styles.modalActions}>

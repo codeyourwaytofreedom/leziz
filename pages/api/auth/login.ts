@@ -9,15 +9,17 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   if (req.method !== "POST") return res.status(405).end();
 
   const { email, password } = req.body as { email?: string; password?: string };
-  if (!email || !password) return res.status(400).json({ error: "Missing email or password" });
+  if (!email || !password) {
+    return res.status(400).json({ error: "MISSING_CREDENTIALS" });
+  }
 
   const db = await getDb();
   const user = await db.collection("users").findOne({ email: email.toLowerCase().trim() });
 
-  if (!user) return res.status(401).json({ error: "Invalid credentials" });
+  if (!user) return res.status(401).json({ error: "INVALID_CREDENTIALS" });
 
   const ok = await bcrypt.compare(password, user.passwordHash);
-  if (!ok) return res.status(401).json({ error: "Invalid credentials" });
+  if (!ok) return res.status(401).json({ error: "INVALID_CREDENTIALS" });
 
   const sessionValue = JSON.stringify({
     userId: String(user._id),

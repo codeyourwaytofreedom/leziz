@@ -15,39 +15,45 @@ export default async function handler(
 
   const { code, token, password } = req.body || {};
   if (!code || !token || !password) {
-    return res.status(400).json({ error: "Missing code, token, or password" });
+    return res.status(400).json({ error: "MISSING_FIELDS" });
   }
 
   const payload = verifySignupToken(token);
   if (!payload) {
-    return res.status(400).json({ error: "Invalid or expired token" });
+    return res.status(400).json({ error: "INVALID_TOKEN" });
   }
 
   if (payload.code !== code) {
-    return res.status(400).json({ error: "Incorrect code" });
+    return res.status(400).json({ error: "INCORRECT_CODE" });
   }
 
   const email = payload.email?.trim().toLowerCase();
   if (!email || !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) {
-    return res.status(400).json({ error: "Invalid email" });
+    return res.status(400).json({ error: "INVALID_EMAIL" });
   }
 
   const venueName =
     typeof payload.venue === "string" ? payload.venue.trim() : "";
   if (!venueName) {
-    return res.status(400).json({ error: "Invalid venue name" });
+    return res.status(400).json({ error: "INVALID_VENUE" });
   }
 
-  if (typeof password !== "string" || password.length < 6) {
+  const passwordOk =
+    typeof password === "string" &&
+    password.length >= 8 &&
+    /[a-z]/.test(password) &&
+    /[A-Z]/.test(password) &&
+    /\d/.test(password);
+  if (!passwordOk) {
     return res
       .status(400)
-      .json({ error: "Password must be at least 6 characters" });
+      .json({ error: "WEAK_PASSWORD" });
   }
 
   const db = await getDb();
   const existing = await db.collection("users").findOne({ email });
   if (existing) {
-    return res.status(409).json({ error: "Email already exists" });
+    return res.status(409).json({ error: "EMAIL_EXISTS" });
   }
 
   const now = new Date();

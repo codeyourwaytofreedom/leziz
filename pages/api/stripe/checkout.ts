@@ -14,12 +14,12 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
   const { plan, email } = req.body || {};
   if (!plan || !email) {
-    return res.status(400).json({ error: "Missing plan or email" });
+    return res.status(400).json({ error: "MISSING_FIELDS" });
   }
 
   const priceId = priceMap[plan as keyof typeof priceMap];
   if (!priceId) {
-    return res.status(400).json({ error: "Invalid plan" });
+    return res.status(400).json({ error: "INVALID_PLAN" });
   }
 
   const stripe = getStripeClient();
@@ -38,11 +38,13 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     });
 
     if (!session.url) {
-      return res.status(500).json({ error: "Missing checkout URL" });
+      return res.status(500).json({ error: "MISSING_CHECKOUT_URL" });
     }
     return res.status(200).json({ url: session.url });
   } catch (err) {
     console.error("Stripe checkout error", err);
-    return res.status(500).json({ error: "Could not create checkout session" });
+    return res
+      .status(500)
+      .json({ error: "CHECKOUT_SESSION_CREATE_FAILED" });
   }
 }

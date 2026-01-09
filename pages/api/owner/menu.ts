@@ -32,7 +32,9 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     menuConfig?: Record<string, unknown>;
   };
 
-  if (!venueId || !menu) return res.status(400).json({ error: "Invalid payload" });
+  if (!venueId || !menu) {
+    return res.status(400).json({ error: "INVALID_PAYLOAD" });
+  }
 
   const db = await getDb();
 

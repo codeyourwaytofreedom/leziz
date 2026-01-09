@@ -43,18 +43,12 @@ export default function Home({ isLoggedIn, venueName, role }: HomeProps) {
       role={role ?? undefined}
     >
       <Head>
-        <title>Leziz | Multilingual QR Menus for Restaurants</title>
-        <meta
-          name="description"
-          content="Create, translate, and share your restaurant menu in minutes. Keep prices fresh, share one QR code, and serve guests in their language."
-        />
-        <meta
-          property="og:title"
-          content="Leziz | Multilingual QR Menus for Restaurants"
-        />
+        <title>{t("home.seo.title")}</title>
+        <meta name="description" content={t("home.seo.description")} />
+        <meta property="og:title" content={t("home.seo.ogTitle")} />
         <meta
           property="og:description"
-          content="Build and update digital menus with translations, QR sharing, and instant pricing changes."
+          content={t("home.seo.ogDescription")}
         />
         <meta property="og:type" content="website" />
       </Head>

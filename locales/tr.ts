@@ -40,6 +40,12 @@ export const tr: TranslationDict = {
   "home.section.gallery.title": "Salon ve teras için üretildi",
   "home.section.gallery.subtitle":
     "Samimi bistrolardan hareketli pub’lara, premium ve kişisel görünen dijital menüler sunun.",
+  "home.seo.title": "Leziz | Restoranlar için Çok Dilli QR Menü",
+  "home.seo.description":
+    "Restoran menünüzü dakikalar içinde oluşturun, çevirin ve paylaşın. Fiyatları güncel tutun, tek bir QR kodu paylaşın ve misafirlerinizi kendi dillerinde karşılayın.",
+  "home.seo.ogTitle": "Leziz | Restoranlar için Çok Dilli QR Menü",
+  "home.seo.ogDescription":
+    "Çeviri, QR paylaşımı ve anlık fiyat güncellemeleriyle dijital menüler oluşturun ve güncelleyin.",
   "home.offers.title": "Leziz ile tasarrufa hazır mısınız?",
   "home.offers.subtitle": "Büyüyen işletmeler için aylık planları keşfedin.",
   "home.offers.button": "Teklifleri gör",
@@ -79,6 +85,8 @@ export const tr: TranslationDict = {
   "owner.modal.category.renameTitle": "Kategoriyi yeniden adlandır",
   "owner.modal.item.addTitle": "Ürün ekle",
   "owner.modal.item.editTitle": "Ürünü düzenle",
+  "owner.item.fallback": "Ürün",
+  "owner.ingredients.placeholder": "ör. domates, fesleğen, mozzarella",
   "owner.empty.start": "Menüne başla",
   "owner.empty.cta": "İlk kategorini ekle",
   "owner.selectMenuImage": "Menü görseli seç",
@@ -86,6 +94,9 @@ export const tr: TranslationDict = {
   // QR
   "owner.qr.alt": "Menü QR kodu",
   "owner.qr.altLarge": "Büyük menü QR kodu",
+  "owner.toast.saved": "Kaydedildi",
+  "owner.toast.saveError": "Menü kaydedilirken hata oluştu",
+  "owner.toast.invalidPayload": "Kaydedilemedi. Lütfen tekrar deneyin.",
 
   // Bigboss
   "bigboss.subtitle":
@@ -100,6 +111,13 @@ export const tr: TranslationDict = {
   "bigboss.creating": "Oluşturuluyor...",
   "bigboss.toast.ownerRequired": "Sahip e-posta ve şifre gerekli",
   "bigboss.toast.passwordShort": "Şifre en az 6 karakter olmalı",
+  "bigboss.toast.unauthorized": "Bu işlem için yetkiniz yok.",
+  "bigboss.toast.invalidVenueName": "Lütfen geçerli bir mekân adı girin.",
+  "bigboss.toast.invalidEmail": "Lütfen geçerli bir e-posta adresi girin.",
+  "bigboss.toast.passwordWeak":
+    "Şifre en az 8 karakter olmalı ve büyük, küçük harf ile sayı içermelidir.",
+  "bigboss.toast.invalidVenueId": "Lütfen geçerli bir mekân ID girin.",
+  "bigboss.toast.emailExists": "Bu e-posta zaten kayıtlı.",
   "bigboss.toast.venueError": "Mekân oluşturma hatası",
   "bigboss.toast.venueSuccess": "Mekân oluşturuldu",
   "bigboss.toast.userError": "Mekân kaydedildi, kullanıcı oluşturulamadı",
@@ -144,6 +162,11 @@ export const tr: TranslationDict = {
     "Çok dilli QR menüler için aylık plan seçin. Silver ve Gold planlarını karşılaştırın ve dakikalar içinde başlayın.",
   "pricing.seo.ogDescription":
     "Çok dilli QR menüler için aylık Silver ve Gold planlarını karşılaştırın.",
+  "checkout.success.title": "Ödeme başarılı",
+  "checkout.success.body": "Aboneliğiniz aktif. Artık menünüzü yönetebilirsiniz.",
+  "menu.ingredients.label": "Malzemeler",
+  "menu.header.alt": "Menü başlığı",
+  "menu.empty": "Henüz menü öğesi yok.",
 
   // Signup
   "signup.selectedPlan": "Seçilen plan",
@@ -161,8 +184,17 @@ export const tr: TranslationDict = {
   "signup.stripeBody": "E-postanız doğrulandı. Planınızı etkinleştirmek için ödeme yapın.",
   "signup.continueCheckout": "Ödemeye devam et",
   "signup.msg.passwordMismatch": "Şifreler eşleşmiyor.",
+  "signup.msg.passwordWeak":
+    "Şifre en az 8 karakter olmalı ve büyük, küçük harf ile sayı içermelidir.",
   "signup.msg.sentCode": "Doğrulama kodunu {email} adresine gönderdik.",
   "signup.msg.requestFailed": "Kayıt başlatılamadı. Lütfen tekrar deneyin.",
+  "signup.msg.missingFields": "Lütfen tüm zorunlu alanları doldurun.",
+  "signup.msg.emailNotConfigured": "E-posta servisi henüz yapılandırılmadı.",
+  "signup.msg.emailSendFailed": "Doğrulama e-postası gönderilemedi.",
+  "signup.msg.invalidEmail": "Lütfen geçerli bir e-posta adresi girin.",
+  "signup.msg.invalidVenue": "Lütfen geçerli bir mekân adı girin.",
+  "signup.msg.emailExists": "Bu e-posta zaten kayıtlı.",
+  "signup.msg.invalidPlan": "Lütfen geçerli bir plan seçin.",
   "signup.msg.invalidCode": "Geçersiz veya süresi dolmuş kod. Lütfen tekrar deneyin.",
   "signup.msg.missingVerifiedEmail": "Doğrulanmış e-posta yok. Lütfen tekrar doğrulayın.",
   "signup.msg.checkoutFailed": "Ödeme başlatılamadı. Lütfen tekrar deneyin.",
