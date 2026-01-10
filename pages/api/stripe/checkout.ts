@@ -1,5 +1,6 @@
 import type { NextApiRequest, NextApiResponse } from "next";
 import { getBaseUrl, getStripeClient } from "@/lib/stripe";
+import { getDb } from "@/lib/mongodb";
 
 const priceMap = {
   silver: process.env.STRIPE_PRICE_SILVER,
@@ -12,7 +13,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     return res.status(405).end();
   }
 
-  const { plan, email } = req.body || {};
+  const { plan, email, source } = req.body || {};
   if (!plan || !email) {
     return res.status(400).json({ error: "MISSING_FIELDS" });
   }
@@ -23,9 +24,13 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   }
 
   const stripe = getStripeClient();
+  const db = await getDb();
+  const user = await db
+    .collection("users")
+    .findOne({ email: String(email).trim().toLowerCase() });
   const baseUrl = process.env.STRIPE_BASE_URL || getBaseUrl(req);
   const successUrl = `${baseUrl}/checkout/success`;
-  const cancelUrl = `${baseUrl}/signup?plan=${encodeURIComponent(plan)}`;
+  const cancelUrl = `${baseUrl}/login?pending=1`;
 
   try {
     const session = await stripe.checkout.sessions.create({
@@ -34,7 +39,11 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       line_items: [{ price: priceId, quantity: 1 }],
       success_url: successUrl,
       cancel_url: cancelUrl,
-      metadata: { plan },
+      ...(user?._id ? { client_reference_id: String(user._id) } : {}),
+      metadata: {
+        plan,
+        ...(user?._id ? { userId: String(user._id) } : {}),
+      },
     });
 
     if (!session.url) {

@@ -234,13 +234,24 @@ export const getServerSideProps: GetServerSideProps<HomeProps> = async (
   let venueName: string | undefined;
   const role = session?.role ?? null;
 
-  if (session?.venueId) {
-    const db = await getDb();
+  const db = session ? await getDb() : null;
+
+  if (session?.venueId && db) {
     const venue = await db
       .collection("venues")
       .findOne({ _id: new ObjectId(session.venueId) });
     if (venue?.name) {
       venueName = typeof venue.name === "string" ? venue.name : venue.name.en;
+    }
+  }
+
+  if (!venueName && session?.userId && db && ObjectId.isValid(session.userId)) {
+    const user = await db
+      .collection("users")
+      .findOne({ _id: new ObjectId(session.userId) });
+    if (user?.venueName) {
+      venueName =
+        typeof user.venueName === "string" ? user.venueName : user.venueName.en;
     }
   }
 

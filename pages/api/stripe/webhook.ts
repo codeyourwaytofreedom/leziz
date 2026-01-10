@@ -1,6 +1,9 @@
 import type { NextApiRequest, NextApiResponse } from "next";
 import { buffer } from "micro";
 import { getStripeClient } from "@/lib/stripe";
+import { getDb } from "@/lib/mongodb";
+import { ObjectId } from "mongodb";
+import { randomBytes } from "crypto";
 
 export const config = {
   api: {
@@ -35,9 +38,75 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   }
 
   switch (event.type) {
-    case "checkout.session.completed":
-      // TODO: mark account as paid/active using event.data.object
+    case "checkout.session.completed": {
+      const session = event.data.object as {
+        client_reference_id?: string | null;
+        customer_email?: string | null;
+        customer?: string | null;
+        subscription?: string | null;
+        metadata?: Record<string, string>;
+      };
+      const refId = session.client_reference_id || session.metadata?.userId || null;
+      const email = session.customer_email?.trim().toLowerCase();
+      const db = await getDb();
+
+      let user =
+        refId && ObjectId.isValid(refId)
+          ? await db.collection("users").findOne({ _id: new ObjectId(refId) })
+          : null;
+      if (!user && email) {
+        user = await db.collection("users").findOne({ email });
+      }
+      if (!user) break;
+      if (user.status === "active") break;
+
+      let venueId = user.venueId;
+      if (!venueId) {
+        const venueName =
+          typeof user.venueName === "string" && user.venueName.trim()
+            ? user.venueName.trim()
+            : "Venue";
+        const now = new Date();
+        const venueInsert = await db.collection("venues").insertOne({
+          name: venueName,
+          langs: ["en", "de"],
+          defaultLang: "en",
+          menu: { categories: [] },
+          menuConfig: {
+            withImages: false,
+            menuBackgroundColor: "#0f172a",
+            currency: "€",
+            menuImage: "fastFood",
+          },
+          createdAt: now,
+        });
+
+        const publicToken = randomBytes(8).toString("hex");
+        await db.collection("public_tokens").insertOne({
+          token: publicToken,
+          venueId: venueInsert.insertedId,
+          venueName,
+          active: true,
+          createdAt: now,
+        });
+        venueId = venueInsert.insertedId;
+      }
+
+      await db.collection("users").updateOne(
+        { _id: user._id },
+        {
+          $set: {
+            status: "active",
+            ...(venueId ? { venueId } : {}),
+            ...(session.customer ? { stripeCustomerId: session.customer } : {}),
+            ...(session.subscription
+              ? { stripeSubscriptionId: session.subscription }
+              : {}),
+          },
+        }
+      );
       break;
+    }
     default:
       break;
   }

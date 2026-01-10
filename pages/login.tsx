@@ -11,6 +11,11 @@ import LoadingButton from "@/components/LoadingButton";
 export default function LoginPage() {
   const router = useRouter();
   const [error, setError] = useState("");
+  const [pendingInfo, setPendingInfo] = useState<{
+    email: string;
+    plan: string;
+  } | null>(null);
+  const [pendingLoading, setPendingLoading] = useState(false);
   const [loading, setLoading] = useState(false);
   const { t } = useI18n();
 
@@ -18,6 +23,7 @@ export default function LoginPage() {
     event.preventDefault();
     if (loading) return;
     setError("");
+    setPendingInfo(null);
     setLoading(true);
 
     const form = event.currentTarget;
@@ -33,7 +39,34 @@ export default function LoginPage() {
     });
 
     if (!res.ok) {
-      setError(t("login.error"));
+      let serverError = "";
+      let pendingPayload: { email?: string | null; plan?: string | null } = {};
+      try {
+        const data = (await res.json()) as {
+          error?: string;
+          email?: string | null;
+          plan?: string | null;
+        };
+        serverError = data.error ?? "";
+        pendingPayload = { email: data.email, plan: data.plan };
+      } catch {
+        serverError = "";
+      }
+      if (serverError === "ACCOUNT_PENDING") {
+        if (pendingPayload.email && pendingPayload.plan) {
+          setPendingInfo({
+            email: pendingPayload.email,
+            plan: pendingPayload.plan,
+          });
+          setError(t("login.pendingMessage"));
+        } else {
+          setError(t("login.pendingMissingPlan"));
+        }
+      } else if (serverError === "MISSING_CREDENTIALS") {
+        setError(t("login.missingCredentials"));
+      } else {
+        setError(t("login.error"));
+      }
       setLoading(false);
       return;
     }
@@ -49,6 +82,37 @@ export default function LoginPage() {
       router.push(next);
     } catch {
       router.push("/owner/menu");
+    }
+  };
+
+  const handleContinuePayment = async () => {
+    if (!pendingInfo || pendingLoading) return;
+    setPendingLoading(true);
+    setError("");
+    try {
+      const res = await fetch("/api/stripe/checkout", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          plan: pendingInfo.plan,
+          email: pendingInfo.email,
+          source: "login",
+        }),
+      });
+      const data = (await res.json()) as { url?: string; error?: string };
+      if (!res.ok || !data.url) {
+        const msg =
+          data.error === "INVALID_PLAN"
+            ? t("login.invalidPlan")
+            : t("login.checkoutFailed");
+        setError(msg);
+        setPendingLoading(false);
+        return;
+      }
+      window.location.href = data.url;
+    } catch {
+      setError(t("login.checkoutFailed"));
+      setPendingLoading(false);
     }
   };
 
@@ -85,16 +149,30 @@ export default function LoginPage() {
           />
 
           {error && <p style={{ color: "red" }}>{error}</p>}
+          {pendingInfo && (
+            <button
+              type="button"
+              className={styles.button}
+              onClick={handleContinuePayment}
+              disabled={pendingLoading}
+            >
+              {pendingLoading
+                ? t("login.pendingLoading")
+                : t("login.pendingCta")}
+            </button>
+          )}
 
-          <LoadingButton
-            type="submit"
-            className={styles.button}
-            loading={loading}
-            loadingLabel={t("login.loading")}
-            disabled={loading}
-          >
-            {t("login.submit")}
-          </LoadingButton>
+          {!pendingInfo && (
+            <LoadingButton
+              type="submit"
+              className={styles.button}
+              loading={loading}
+              loadingLabel={t("login.loading")}
+              disabled={loading}
+            >
+              {t("login.submit")}
+            </LoadingButton>
+          )}
         </form>
       </div>
     </Layout>

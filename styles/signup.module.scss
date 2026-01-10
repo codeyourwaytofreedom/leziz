@@ -131,3 +131,44 @@
   display: grid;
   gap: 0.75rem;
 }
+
+.errorMessage {
+  color: var(--color-danger-text);
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  justify-content: center;
+}
+
+.errorIcon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  border-radius: 999px;
+  background: var(--color-danger-hover-bg);
+  color: var(--color-danger-text);
+  font-weight: 700;
+  line-height: 1;
+  font-size: 0.85rem;
+}
+
+.successMessage {
+  color: var(--color-success-hover-text);
+}
+
+.successIcon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  border-radius: 999px;
+  background: var(--color-success-hover-bg);
+  color: var(--color-success-hover-text);
+  font-weight: 700;
+  line-height: 1;
+  font-size: 0.85rem;
+  margin-right: 0.4rem;
+}

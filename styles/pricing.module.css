@@ -48,7 +48,8 @@
   display: grid;
   grid-template-rows: auto 1fr;
   overflow: hidden;
-  min-height: 420px;
+  min-height: 500px;
+  height: 500px;
   cursor: pointer;
   transition: transform 140ms ease, box-shadow 140ms ease, border-color 140ms ease;
   text-decoration: none;
@@ -66,6 +67,11 @@
 .cardGold {
   background: linear-gradient(140deg, #fff7db 0%, #fde68a 100%);
   border-color: #fbbf24;
+}
+
+.cardFree {
+  background: linear-gradient(140deg, #ecfeff 0%, #cffafe 100%);
+  border-color: #67e8f9;
 }
 
 .cardTop {
@@ -118,6 +124,7 @@
 .cardBody {
   padding: 0 1.25rem 1.25rem;
   display: grid;
+  grid-template-rows: 1fr auto;
   gap: 1rem;
   text-align: left;
 }
@@ -149,6 +156,7 @@
   justify-content: center;
   width: 100%;
   padding: 0.6rem 1rem;
+  height: 100px;
   border-radius: 10px;
   border: 1px solid var(--color-primary-strong);
   background: var(--color-primary);
@@ -162,6 +170,11 @@
 .cta:hover {
   transform: translateY(-1px);
   box-shadow: 0 10px 18px rgba(0, 0, 0, 0.18);
+}
+
+.ctaFree {
+  background: #0ea5e9;
+  border-color: #0284c7;
 }
 
 @media (max-width: 640px) {

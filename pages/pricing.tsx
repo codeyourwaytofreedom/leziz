@@ -53,9 +53,7 @@ const plans = [
       "pricing.feature.languages6",
       "pricing.feature.logo",
       "pricing.feature.whatsapp",
-      "pricing.feature.unlimited",
       "pricing.feature.qr",
-      "pricing.feature.editor",
     ],
   },
 ];
@@ -73,8 +71,7 @@ export default function PricingPage({
 }: PricingProps) {
   const { t } = useI18n();
   const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || "";
-  const whatsappUrl =
-    process.env.NEXT_PUBLIC_WHATSAPP_URL || "https://wa.me/";
+  const whatsappUrl = process.env.NEXT_PUBLIC_WHATSAPP_URL || "https://wa.me/";
 
   return (
     <Layout
@@ -84,10 +81,7 @@ export default function PricingPage({
     >
       <Head>
         <title>{t("pricing.seo.title")}</title>
-        <meta
-          name="description"
-          content={t("pricing.seo.description")}
-        />
+        <meta name="description" content={t("pricing.seo.description")} />
         <meta property="og:title" content={t("pricing.seo.title")} />
         <meta
           property="og:description"
@@ -100,7 +94,11 @@ export default function PricingPage({
             <link rel="alternate" hrefLang="en" href={`${baseUrl}/pricing`} />
             <link rel="alternate" hrefLang="de" href={`${baseUrl}/pricing`} />
             <link rel="alternate" hrefLang="tr" href={`${baseUrl}/pricing`} />
-            <link rel="alternate" hrefLang="x-default" href={`${baseUrl}/pricing`} />
+            <link
+              rel="alternate"
+              hrefLang="x-default"
+              href={`${baseUrl}/pricing`}
+            />
           </>
         )}
       </Head>
@@ -146,7 +144,11 @@ export default function PricingPage({
                     )
                   )}
                 </ul>
-                <span className={styles.cta}>{t("pricing.cta")}</span>
+                <span
+                  className={`${styles.cta} ${isFree ? styles.ctaFree : ""}`}
+                >
+                  {isFree ? t("pricing.ctaFree") : t("pricing.cta")}
+                </span>
               </div>
             );
 

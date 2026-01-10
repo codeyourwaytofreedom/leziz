@@ -1,30 +1,33 @@
 import type { NextApiRequest, NextApiResponse } from "next";
-import { getDb } from "@/lib/mongodb";
-
-import bcrypt from "bcryptjs";
 import { serialize } from "cookie";
+import { ObjectId } from "mongodb";
 
+import { getDb } from "@/lib/mongodb";
+import { getSession } from "@/lib/session";
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
-  if (req.method !== "POST") return res.status(405).end();
+  if (req.method !== "POST") {
+    res.setHeader("Allow", "POST");
+    return res.status(405).end();
+  }
 
-  const { email, password } = req.body as { email?: string; password?: string };
-  if (!email || !password) {
-    return res.status(400).json({ error: "MISSING_CREDENTIALS" });
+  const session = getSession(req);
+  if (!session?.userId || !ObjectId.isValid(session.userId)) {
+    return res.status(401).json({ error: "UNAUTHORIZED" });
   }
 
   const db = await getDb();
-  const user = await db.collection("users").findOne({ email: email.toLowerCase().trim() });
-
-  if (!user) return res.status(401).json({ error: "INVALID_CREDENTIALS" });
-
-  const ok = await bcrypt.compare(password, user.passwordHash);
-  if (!ok) return res.status(401).json({ error: "INVALID_CREDENTIALS" });
+  const user = await db
+    .collection("users")
+    .findOne({ _id: new ObjectId(session.userId) });
+  if (!user) {
+    return res.status(401).json({ error: "UNAUTHORIZED" });
+  }
 
   const sessionValue = JSON.stringify({
     userId: String(user._id),
     role: user.role,
-    venueId: user.venueId,
+    venueId: user.venueId ?? null,
     status: user.status ?? null,
   });
 
@@ -43,5 +46,6 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     ok: true,
     role: user.role ?? null,
     venueId: user.venueId ?? null,
+    status: user.status ?? null,
   });
 }

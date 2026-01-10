@@ -1,10 +1,7 @@
 import crypto from "crypto";
 
 export type SignupTokenPayload = {
-  email: string;
-  plan: string;
-  venue: string;
-  code: string;
+  requestId: string;
   exp: number;
   iat: number;
 };
@@ -34,7 +31,7 @@ function verifySignature(token: string) {
 
 export function createSignupToken(data: Omit<SignupTokenPayload, "exp" | "iat"> & { exp?: number }) {
   const now = Date.now();
-  const exp = data.exp ?? now + 2 * 60 * 1000; // 2 minutes
+  const exp = data.exp ?? now + 15 * 60 * 1000; // 15 minutes
   return sign({ ...data, iat: now, exp });
 }
 

@@ -43,6 +43,9 @@ type Props = {
   venueName: string;
   menu: Menu;
   languages: Language[];
+  pending?: boolean;
+  pendingEmail?: string | null;
+  pendingPlan?: string | null;
   qrUrl?: string;
   qrDataUrl?: string;
   menuConfig?: {
@@ -107,6 +110,9 @@ export default function OwnerMenuPage({
   venueName,
   menu: initialMenu,
   languages: providedLanguages,
+  pending,
+  pendingEmail,
+  pendingPlan,
   qrUrl,
   qrDataUrl,
   menuConfig: initialMenuConfig,
@@ -143,6 +149,7 @@ export default function OwnerMenuPage({
   const [expandedCategoryId, setExpandedCategoryId] = useState<string | null>(
     null
   );
+  const [pendingCheckout, setPendingCheckout] = useState(false);
 
   const [renameTarget, setRenameTarget] = useState<{
     id: string;
@@ -199,6 +206,58 @@ export default function OwnerMenuPage({
   } | null>(null);
   const [deleteCategoryVisible, setDeleteCategoryVisible] = useState(false);
   const [deleteCategoryConfirm, setDeleteCategoryConfirm] = useState("");
+
+  if (pending) {
+    return (
+      <Layout isLoggedIn showLogin={false} role="owner" venueName={venueName}>
+        <div className={styles.wrapper}>
+          <div className={styles.emptyState}>
+            <div className={styles.emptyCopy}>
+              <h3>{t("owner.pending.title")}</h3>
+              <p>{t("owner.pending.body")}</p>
+            </div>
+            <button
+              type="button"
+              className={`${styles.btn} ${styles.btnAccent} ${styles.btnWide}`}
+              onClick={async () => {
+                if (pendingCheckout || !pendingEmail || !pendingPlan) return;
+                setPendingCheckout(true);
+                try {
+                  const res = await fetch("/api/stripe/checkout", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({
+                      plan: pendingPlan,
+                      email: pendingEmail,
+                      source: "login",
+                    }),
+                  });
+                  const data = (await res.json()) as {
+                    url?: string;
+                    error?: string;
+                  };
+                  if (!res.ok || !data.url) {
+                    toast.addToast(t("owner.pending.checkoutFailed"), "error");
+                    setPendingCheckout(false);
+                    return;
+                  }
+                  window.location.href = data.url;
+                } catch {
+                  toast.addToast(t("owner.pending.checkoutFailed"), "error");
+                  setPendingCheckout(false);
+                }
+              }}
+              disabled={pendingCheckout}
+            >
+              {pendingCheckout
+                ? t("owner.pending.loading")
+                : t("owner.pending.cta")}
+            </button>
+          </div>
+        </div>
+      </Layout>
+    );
+  }
 
   function addCategory() {
     setNewCategoryTranslations({});
@@ -1308,6 +1367,29 @@ export const getServerSideProps: GetServerSideProps<Props> = async (ctx) => {
   const venueId = session.venueId;
   const db = await getDb();
 
+  if (session.userId && ObjectId.isValid(session.userId)) {
+    const user = await db
+      .collection("users")
+      .findOne({ _id: new ObjectId(session.userId) });
+    if (user?.status === "pending") {
+      return {
+        props: {
+          venueId: "",
+          venueName:
+            typeof user.venueName === "string" && user.venueName.trim()
+              ? user.venueName
+              : "Venue",
+          menu: { categories: [] },
+          languages: ["en", "tr", "de"],
+          pending: true,
+          pendingEmail: user.email ?? null,
+          pendingPlan: user.plan ?? null,
+          menuConfig: undefined,
+        },
+      };
+    }
+  }
+
   const tokenDoc = await db.collection("public_tokens").findOne({
     $or: [
       { venueId: new ObjectId(session.venueId) },
@@ -1315,6 +1397,10 @@ export const getServerSideProps: GetServerSideProps<Props> = async (ctx) => {
     ],
     active: true,
   });
+
+  if (!venueId || !ObjectId.isValid(venueId)) {
+    return { notFound: true };
+  }
 
   const venue = await db
     .collection("venues")
