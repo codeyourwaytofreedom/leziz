@@ -1384,7 +1384,7 @@ export const getServerSideProps: GetServerSideProps<Props> = async (ctx) => {
           pending: true,
           pendingEmail: user.email ?? null,
           pendingPlan: user.plan ?? null,
-          menuConfig: undefined,
+          menuConfig: {},
         },
       };
     }
@@ -1409,7 +1409,7 @@ export const getServerSideProps: GetServerSideProps<Props> = async (ctx) => {
 
   const venueName = venue.name;
 
-  const menuConfig = venue.menuConfig ?? null;
+  const menuConfig = venue.menuConfig ?? {};
   const menu: Menu =
     venue.menu && Object.keys(venue.menu).length > 0
       ? { ...venue.menu, menuConfig }

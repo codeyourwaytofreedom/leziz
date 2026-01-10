@@ -13,8 +13,19 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     return res.status(400).json({ error: "MISSING_CREDENTIALS" });
   }
 
+  const normalizedEmail = email.toLowerCase().trim();
+  const passwordOk =
+    typeof password === "string" &&
+    password.length >= 8 &&
+    /[a-z]/.test(password) &&
+    /[A-Z]/.test(password) &&
+    /\d/.test(password);
+  if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(normalizedEmail) || !passwordOk) {
+    return res.status(401).json({ error: "INVALID_CREDENTIALS" });
+  }
+
   const db = await getDb();
-  const user = await db.collection("users").findOne({ email: email.toLowerCase().trim() });
+  const user = await db.collection("users").findOne({ email: normalizedEmail });
 
   if (!user) return res.status(401).json({ error: "INVALID_CREDENTIALS" });
 
