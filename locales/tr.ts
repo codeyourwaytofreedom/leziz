@@ -146,6 +146,7 @@ export const tr: TranslationDict = {
   "login.submit": "Devam",
   "login.error": "Geçersiz bilgiler",
   "login.missingCredentials": "Lütfen e-posta ve şifreyi girin.",
+  "login.rateLimited": "Çok fazla giriş denemesi. Lütfen birkaç dakika sonra deneyin.",
   "login.pendingMessage":
     "Hesabınız henüz aktif değil. Devam etmek için ödeme yapın.",
   "login.pendingMissingPlan":

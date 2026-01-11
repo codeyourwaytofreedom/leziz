@@ -64,6 +64,8 @@ export default function LoginPage() {
         }
       } else if (serverError === "MISSING_CREDENTIALS") {
         setError(t("login.missingCredentials"));
+      } else if (serverError === "RATE_LIMITED") {
+        setError(t("login.rateLimited"));
       } else {
         setError(t("login.error"));
       }

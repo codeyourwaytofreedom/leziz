@@ -1,6 +1,7 @@
 import type { NextApiRequest, NextApiResponse } from "next";
 import { ObjectId } from "mongodb";
 import { getDb } from "@/lib/mongodb";
+import { getSession } from "@/lib/session";
 
 type LocalizedText = string | Record<string, string>;
 
@@ -34,6 +35,17 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
   if (!venueId || !menu) {
     return res.status(400).json({ error: "INVALID_PAYLOAD" });
+  }
+
+  const session = getSession(req);
+  if (!session?.userId) {
+    return res.status(401).json({ error: "UNAUTHORIZED" });
+  }
+  if (session.role !== "bigboss") {
+    const sessionVenueId = session.venueId ? String(session.venueId) : "";
+    if (!sessionVenueId || sessionVenueId !== String(venueId)) {
+      return res.status(403).json({ error: "FORBIDDEN" });
+    }
   }
 
   const db = await getDb();

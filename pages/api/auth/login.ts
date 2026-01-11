@@ -1,5 +1,6 @@
 import type { NextApiRequest, NextApiResponse } from "next";
 import { getDb } from "@/lib/mongodb";
+import { getRequestIp, loginEmailLimiter, loginIpLimiter } from "@/lib/rateLimit";
 
 import bcrypt from "bcryptjs";
 import { serialize } from "cookie";
@@ -14,6 +15,14 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   }
 
   const normalizedEmail = email.toLowerCase().trim();
+  const ip = getRequestIp(req);
+  if (loginIpLimiter) {
+    const ipLimit = await loginIpLimiter.limit(ip);
+    if (!ipLimit.success) {
+      return res.status(429).json({ error: "RATE_LIMITED" });
+    }
+  }
+
   const passwordOk =
     typeof password === "string" &&
     password.length >= 8 &&
@@ -22,6 +31,13 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     /\d/.test(password);
   if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(normalizedEmail) || !passwordOk) {
     return res.status(401).json({ error: "INVALID_CREDENTIALS" });
+  }
+
+  if (loginEmailLimiter) {
+    const emailLimit = await loginEmailLimiter.limit(normalizedEmail);
+    if (!emailLimit.success) {
+      return res.status(429).json({ error: "RATE_LIMITED" });
+    }
   }
 
   const db = await getDb();

@@ -147,6 +147,7 @@ export const en: TranslationDict = {
   "login.submit": "Continue",
   "login.error": "Invalid credentials",
   "login.missingCredentials": "Please enter your email and password.",
+  "login.rateLimited": "Too many login attempts. Try again in a few minutes.",
   "login.pendingMessage":
     "Your account isn’t active yet. Complete payment to continue.",
   "login.pendingMissingPlan":
