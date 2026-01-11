@@ -281,9 +281,7 @@ export default function MenuPage({
               ))}
 
               {menu.categories.length === 0 && (
-                <div className={styles.section}>
-                  <p>{t("menu.empty")}</p>
-                </div>
+                <div className={styles.section} />
               )}
             </div>
           </div>

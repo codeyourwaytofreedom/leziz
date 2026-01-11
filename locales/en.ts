@@ -90,6 +90,14 @@ export const en: TranslationDict = {
   "owner.ingredients.placeholder": "e.g. tomato, basil, mozzarella",
   "owner.empty.start": "Start your menu",
   "owner.empty.cta": "Add your first category",
+  "owner.languages.title": "Choose menu languages",
+  "owner.languages.helper": "Select the languages you want to use for your menu.",
+  "owner.languages.save": "Save languages",
+  "owner.languages.saving": "Saving...",
+  "owner.languages.saved": "Languages saved.",
+  "owner.languages.required": "Select at least one language.",
+  "owner.languages.saveError": "Could not save languages.",
+  "owner.languages.edit": "Edit languages",
   "owner.selectMenuImage": "Select menu image",
 
   // QR

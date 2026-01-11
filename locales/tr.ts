@@ -89,6 +89,14 @@ export const tr: TranslationDict = {
   "owner.ingredients.placeholder": "ör. domates, fesleğen, mozzarella",
   "owner.empty.start": "Menüne başla",
   "owner.empty.cta": "İlk kategorini ekle",
+  "owner.languages.title": "Menü dillerini seç",
+  "owner.languages.helper": "Menünüzde kullanmak istediğiniz dilleri seçin.",
+  "owner.languages.save": "Dilleri kaydet",
+  "owner.languages.saving": "Kaydediliyor...",
+  "owner.languages.saved": "Diller kaydedildi.",
+  "owner.languages.required": "En az bir dil seçin.",
+  "owner.languages.saveError": "Diller kaydedilemedi.",
+  "owner.languages.edit": "Dilleri düzenle",
   "owner.selectMenuImage": "Menü görseli seç",
 
   // QR

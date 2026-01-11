@@ -37,6 +37,14 @@ const styleOptions = [
   { name: "snow", value: "#f9fafb" },
   { name: "pearl", value: "#f8f9fb" },
 ];
+const languageOptions: { code: Language; label: string; flag: string }[] = [
+  { code: "en", label: "EN", flag: "🇬🇧" },
+  { code: "tr", label: "TR", flag: "🇹🇷" },
+  { code: "de", label: "DE", flag: "🇩🇪" },
+  { code: "fr", label: "FR", flag: "🇫🇷" },
+  { code: "es", label: "ES", flag: "🇪🇸" },
+  { code: "it", label: "IT", flag: "🇮🇹" },
+];
 
 type Props = {
   venueId: string; // ObjectId as string
@@ -117,11 +125,10 @@ export default function OwnerMenuPage({
   qrDataUrl,
   menuConfig: initialMenuConfig,
 }: Props) {
-  const languages =
-    providedLanguages && providedLanguages.length > 0
-      ? providedLanguages
-      : (["en", "tr", "de"] as Language[]);
-  const [language, setLanguage] = useState<Language>(languages[0] ?? "en");
+  const [languages, setLanguages] = useState<Language[]>(
+    providedLanguages ?? []
+  );
+  const [language, setLanguage] = useState<Language>("en");
   const [menu, setMenu] = useState<Menu>(initialMenu);
   const [hasChanges, setHasChanges] = useState(false);
   const [qrModalOpen, setQrModalOpen] = useState(false);
@@ -206,6 +213,11 @@ export default function OwnerMenuPage({
   } | null>(null);
   const [deleteCategoryVisible, setDeleteCategoryVisible] = useState(false);
   const [deleteCategoryConfirm, setDeleteCategoryConfirm] = useState("");
+  const [languageModalOpen, setLanguageModalOpen] = useState(false);
+  const [languageModalVisible, setLanguageModalVisible] = useState(false);
+  const [languageDraft, setLanguageDraft] = useState<Language[]>(languages);
+  const [languageSaving, setLanguageSaving] = useState(false);
+  const [startCategoryAfterLang, setStartCategoryAfterLang] = useState(false);
 
   if (pending) {
     return (
@@ -258,6 +270,38 @@ export default function OwnerMenuPage({
       </Layout>
     );
   }
+
+  useEffect(() => {
+    if (Array.isArray(providedLanguages)) {
+      setLanguages(providedLanguages);
+    }
+  }, [providedLanguages]);
+
+  useEffect(() => {
+    if (languages.length > 0 && !languages.includes(language)) {
+      setLanguage(languages[0] ?? "en");
+    }
+  }, [languages, language]);
+
+  useEffect(() => {
+    if (languages.length > 0 && !languages.includes(addLanguageTab)) {
+      setAddLanguageTab(languages[0] ?? "en");
+    }
+  }, [languages, addLanguageTab]);
+
+  useEffect(() => {
+    if (languages.length > 0 && !languages.includes(editLanguageTab)) {
+      setEditLanguageTab(languages[0] ?? "en");
+    }
+  }, [languages, editLanguageTab]);
+
+  useEffect(() => {
+    if (languages.length === 0) {
+      setLanguageDraft([]);
+      setStartCategoryAfterLang(false);
+      setLanguageModalOpen(true);
+    }
+  }, [languages.length]);
 
   function addCategory() {
     setNewCategoryTranslations({});
@@ -491,6 +535,15 @@ export default function OwnerMenuPage({
     }
     setNewCategoryVisible(false);
   }, [newCategoryOpen]);
+
+  useEffect(() => {
+    if (languageModalOpen) {
+      setLanguageModalVisible(false);
+      const id = requestAnimationFrame(() => setLanguageModalVisible(true));
+      return () => cancelAnimationFrame(id);
+    }
+    setLanguageModalVisible(false);
+  }, [languageModalOpen]);
 
   function editItem(catId: string, itemId: string) {
     const cat = menu.categories.find((c) => c.id === catId);
@@ -743,6 +796,65 @@ export default function OwnerMenuPage({
     }
   }
 
+  function openLanguageModal(startCategory: boolean) {
+    setLanguageDraft(languages.length > 0 ? languages : []);
+    setStartCategoryAfterLang(startCategory);
+    setLanguageModalOpen(true);
+  }
+
+  function closeLanguageModal() {
+    setLanguageModalVisible(false);
+    setTimeout(() => {
+      setLanguageModalOpen(false);
+      setStartCategoryAfterLang(false);
+    }, 200);
+  }
+
+  async function saveLanguages() {
+    if (languageSaving) return;
+    if (languageDraft.length === 0) {
+      toast.addToast(t("owner.languages.required"), "error");
+      return;
+    }
+    setLanguageSaving(true);
+    try {
+      const res = await fetch("/api/owner/languages", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ venueId, languages: languageDraft }),
+      });
+      if (!res.ok) {
+        let serverError = "";
+        try {
+          const data = (await res.json()) as { error?: string };
+          serverError = data.error ?? "";
+        } catch {
+          serverError = "";
+        }
+        throw new Error(serverError || "save");
+      }
+      setLanguages(languageDraft);
+      setLanguage(languageDraft[0] ?? "en");
+      toast.addToast(t("owner.languages.saved"), "success");
+      closeLanguageModal();
+      if (startCategoryAfterLang) {
+        setTimeout(() => addCategory(), 220);
+      }
+    } catch (err) {
+      const errorKeyMap: Record<string, string> = {
+        INVALID_LANGUAGES: "owner.languages.required",
+        save: "owner.languages.saveError",
+      };
+      const msg =
+        err instanceof Error && errorKeyMap[err.message]
+          ? t(errorKeyMap[err.message])
+          : t("owner.languages.saveError");
+      toast.addToast(msg, "error");
+    } finally {
+      setLanguageSaving(false);
+    }
+  }
+
   return (
     <Layout isLoggedIn showLogin={false} role="owner" venueName={venueName}>
       <div className={styles.wrapper}>
@@ -862,6 +974,15 @@ export default function OwnerMenuPage({
               </button>
             ))}
           </div>
+          {languages.length > 0 && (
+            <button
+              type="button"
+              onClick={() => openLanguageModal(false)}
+              className={`${styles.btn} ${styles.btnSubtle} ${styles.btnSmall}`}
+            >
+              {t("owner.languages.edit")}
+            </button>
+          )}
         </div>
 
         <section className={styles.section}>
@@ -895,17 +1016,20 @@ export default function OwnerMenuPage({
               <button
                 type="button"
                 className={styles.emptyIcon}
-                onClick={addCategory}
-                aria-label="Add your first category"
+                onClick={() => {
+                  if (languages.length > 0) {
+                    addCategory();
+                  } else {
+                    openLanguageModal(true);
+                  }
+                }}
+                aria-label={t("owner.empty.start")}
               >
                 <FontAwesomeIcon icon={faPlusCircle} />
               </button>
               <div className={styles.emptyCopy}>
                 <h3>{t("owner.empty.start")}</h3>
               </div>
-              <span className={styles.emptyActionLabel}>
-                {t("owner.empty.cta")}
-              </span>
             </div>
           )}
 
@@ -1315,6 +1439,64 @@ export default function OwnerMenuPage({
         </form>
       </Modal>
 
+      <Modal
+        isOpen={languageModalOpen}
+        isVisible={languageModalVisible}
+        title={t("owner.languages.title")}
+      >
+        <div className={styles.modalForm}>
+          <p className={styles.modalHelper}>{t("owner.languages.helper")}</p>
+          <div className={styles.languageSelectGrid}>
+            {languageOptions.map(({ code, label, flag }) => {
+              const active = languageDraft.includes(code);
+              return (
+                <button
+                  key={code}
+                  type="button"
+                  className={`${styles.languageSelectChip} ${
+                    active ? styles.languageSelectChipActive : ""
+                  }`}
+                  onClick={() =>
+                    setLanguageDraft((prev) => {
+                      if (prev.includes(code)) {
+                        return prev.filter((l) => l !== code);
+                      }
+                      return [...prev, code];
+                    })
+                  }
+                  aria-pressed={active}
+                >
+                  <span className={styles.languageSelectFlag} aria-hidden>
+                    {flag}
+                  </span>
+                  <span>{label}</span>
+                </button>
+              );
+            })}
+          </div>
+          <div className={styles.modalActions}>
+            <button
+              type="button"
+              onClick={closeLanguageModal}
+              className={`${styles.btn} ${styles.btnSubtle} ${styles.btnSmall}`}
+              disabled={languageSaving}
+            >
+              {t("owner.modal.cancel")}
+            </button>
+            <button
+              type="button"
+              onClick={saveLanguages}
+              className={`${styles.btn} ${styles.btnSuccess} ${styles.btnSmall}`}
+              disabled={languageSaving}
+            >
+              {languageSaving
+                ? t("owner.languages.saving")
+                : t("owner.languages.save")}
+            </button>
+          </div>
+        </div>
+      </Modal>
+
       <Modal isOpen={qrModalOpen} isVisible={qrModalOpen} title="">
         <div className={styles.qrModalBody}>
           {qrDataUrl && (
@@ -1380,7 +1562,7 @@ export const getServerSideProps: GetServerSideProps<Props> = async (ctx) => {
               ? user.venueName
               : "Venue",
           menu: { categories: [] },
-          languages: ["en", "tr", "de"],
+          languages: [],
           pending: true,
           pendingEmail: user.email ?? null,
           pendingPlan: user.plan ?? null,
@@ -1414,9 +1596,7 @@ export const getServerSideProps: GetServerSideProps<Props> = async (ctx) => {
     venue.menu && Object.keys(venue.menu).length > 0
       ? { ...venue.menu, menuConfig }
       : { categories: [], menuConfig };
-  const languages = Array.isArray(venue.langs)
-    ? venue.langs
-    : ["en", "tr", "de"];
+  const languages = Array.isArray(venue.langs) ? venue.langs : [];
 
   let qrUrl: string | undefined;
   let qrDataUrl: string | undefined;

@@ -69,8 +69,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         const now = new Date();
         const venueInsert = await db.collection("venues").insertOne({
           name: venueName,
-          langs: ["en", "de"],
-          defaultLang: "en",
+          langs: [],
           menu: { categories: [] },
           menuConfig: {
             withImages: false,
